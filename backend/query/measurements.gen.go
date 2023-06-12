@@ -16,14 +16,14 @@ import (
 
 	"gorm.io/plugin/dbresolver"
 
-	"backend/db/model"
+	"backend/models"
 )
 
 func newMeasurement(db *gorm.DB, opts ...gen.DOOption) measurement {
 	_measurement := measurement{}
 
 	_measurement.measurementDo.UseDB(db, opts...)
-	_measurement.measurementDo.UseModel(&model.Measurement{})
+	_measurement.measurementDo.UseModel(&models.Measurement{})
 
 	tableName := _measurement.measurementDo.TableName()
 	_measurement.ALL = field.NewAsterisk(tableName)
@@ -31,10 +31,20 @@ func newMeasurement(db *gorm.DB, opts ...gen.DOOption) measurement {
 	_measurement.CreatedAt = field.NewTime(tableName, "created_at")
 	_measurement.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_measurement.DeletedAt = field.NewField(tableName, "deleted_at")
-	_measurement.R = field.NewFloat64(tableName, "r")
-	_measurement.G = field.NewFloat64(tableName, "g")
-	_measurement.B = field.NewFloat64(tableName, "b")
+	_measurement.StartID = field.NewInt(tableName, "start_id")
+	_measurement.EndID = field.NewInt(tableName, "end_id")
 	_measurement.Distance = field.NewFloat64(tableName, "distance")
+	_measurement.Start = measurementBelongsToStart{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("Start", "models.Color"),
+	}
+
+	_measurement.End = measurementBelongsToEnd{
+		db: db.Session(&gorm.Session{}),
+
+		RelationField: field.NewRelation("End", "models.Color"),
+	}
 
 	_measurement.fillFieldMap()
 
@@ -49,10 +59,12 @@ type measurement struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
-	R         field.Float64
-	G         field.Float64
-	B         field.Float64
+	StartID   field.Int
+	EndID     field.Int
 	Distance  field.Float64
+	Start     measurementBelongsToStart
+
+	End measurementBelongsToEnd
 
 	fieldMap map[string]field.Expr
 }
@@ -73,9 +85,8 @@ func (m *measurement) updateTableName(table string) *measurement {
 	m.CreatedAt = field.NewTime(table, "created_at")
 	m.UpdatedAt = field.NewTime(table, "updated_at")
 	m.DeletedAt = field.NewField(table, "deleted_at")
-	m.R = field.NewFloat64(table, "r")
-	m.G = field.NewFloat64(table, "g")
-	m.B = field.NewFloat64(table, "b")
+	m.StartID = field.NewInt(table, "start_id")
+	m.EndID = field.NewInt(table, "end_id")
 	m.Distance = field.NewFloat64(table, "distance")
 
 	m.fillFieldMap()
@@ -93,15 +104,15 @@ func (m *measurement) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (m *measurement) fillFieldMap() {
-	m.fieldMap = make(map[string]field.Expr, 8)
+	m.fieldMap = make(map[string]field.Expr, 9)
 	m.fieldMap["id"] = m.ID
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
 	m.fieldMap["deleted_at"] = m.DeletedAt
-	m.fieldMap["r"] = m.R
-	m.fieldMap["g"] = m.G
-	m.fieldMap["b"] = m.B
+	m.fieldMap["start_id"] = m.StartID
+	m.fieldMap["end_id"] = m.EndID
 	m.fieldMap["distance"] = m.Distance
+
 }
 
 func (m measurement) clone(db *gorm.DB) measurement {
@@ -112,6 +123,148 @@ func (m measurement) clone(db *gorm.DB) measurement {
 func (m measurement) replaceDB(db *gorm.DB) measurement {
 	m.measurementDo.ReplaceDB(db)
 	return m
+}
+
+type measurementBelongsToStart struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a measurementBelongsToStart) Where(conds ...field.Expr) *measurementBelongsToStart {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a measurementBelongsToStart) WithContext(ctx context.Context) *measurementBelongsToStart {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a measurementBelongsToStart) Session(session *gorm.Session) *measurementBelongsToStart {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a measurementBelongsToStart) Model(m *models.Measurement) *measurementBelongsToStartTx {
+	return &measurementBelongsToStartTx{a.db.Model(m).Association(a.Name())}
+}
+
+type measurementBelongsToStartTx struct{ tx *gorm.Association }
+
+func (a measurementBelongsToStartTx) Find() (result *models.Color, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a measurementBelongsToStartTx) Append(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a measurementBelongsToStartTx) Replace(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a measurementBelongsToStartTx) Delete(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a measurementBelongsToStartTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a measurementBelongsToStartTx) Count() int64 {
+	return a.tx.Count()
+}
+
+type measurementBelongsToEnd struct {
+	db *gorm.DB
+
+	field.RelationField
+}
+
+func (a measurementBelongsToEnd) Where(conds ...field.Expr) *measurementBelongsToEnd {
+	if len(conds) == 0 {
+		return &a
+	}
+
+	exprs := make([]clause.Expression, 0, len(conds))
+	for _, cond := range conds {
+		exprs = append(exprs, cond.BeCond().(clause.Expression))
+	}
+	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
+	return &a
+}
+
+func (a measurementBelongsToEnd) WithContext(ctx context.Context) *measurementBelongsToEnd {
+	a.db = a.db.WithContext(ctx)
+	return &a
+}
+
+func (a measurementBelongsToEnd) Session(session *gorm.Session) *measurementBelongsToEnd {
+	a.db = a.db.Session(session)
+	return &a
+}
+
+func (a measurementBelongsToEnd) Model(m *models.Measurement) *measurementBelongsToEndTx {
+	return &measurementBelongsToEndTx{a.db.Model(m).Association(a.Name())}
+}
+
+type measurementBelongsToEndTx struct{ tx *gorm.Association }
+
+func (a measurementBelongsToEndTx) Find() (result *models.Color, err error) {
+	return result, a.tx.Find(&result)
+}
+
+func (a measurementBelongsToEndTx) Append(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Append(targetValues...)
+}
+
+func (a measurementBelongsToEndTx) Replace(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Replace(targetValues...)
+}
+
+func (a measurementBelongsToEndTx) Delete(values ...*models.Color) (err error) {
+	targetValues := make([]interface{}, len(values))
+	for i, v := range values {
+		targetValues[i] = v
+	}
+	return a.tx.Delete(targetValues...)
+}
+
+func (a measurementBelongsToEndTx) Clear() error {
+	return a.tx.Clear()
+}
+
+func (a measurementBelongsToEndTx) Count() int64 {
+	return a.tx.Count()
 }
 
 type measurementDo struct{ gen.DO }
@@ -145,17 +298,17 @@ type IMeasurementDo interface {
 	Count() (count int64, err error)
 	Scopes(funcs ...func(gen.Dao) gen.Dao) IMeasurementDo
 	Unscoped() IMeasurementDo
-	Create(values ...*model.Measurement) error
-	CreateInBatches(values []*model.Measurement, batchSize int) error
-	Save(values ...*model.Measurement) error
-	First() (*model.Measurement, error)
-	Take() (*model.Measurement, error)
-	Last() (*model.Measurement, error)
-	Find() ([]*model.Measurement, error)
-	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Measurement, err error)
-	FindInBatches(result *[]*model.Measurement, batchSize int, fc func(tx gen.Dao, batch int) error) error
+	Create(values ...*models.Measurement) error
+	CreateInBatches(values []*models.Measurement, batchSize int) error
+	Save(values ...*models.Measurement) error
+	First() (*models.Measurement, error)
+	Take() (*models.Measurement, error)
+	Last() (*models.Measurement, error)
+	Find() ([]*models.Measurement, error)
+	FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*models.Measurement, err error)
+	FindInBatches(result *[]*models.Measurement, batchSize int, fc func(tx gen.Dao, batch int) error) error
 	Pluck(column field.Expr, dest interface{}) error
-	Delete(...*model.Measurement) (info gen.ResultInfo, err error)
+	Delete(...*models.Measurement) (info gen.ResultInfo, err error)
 	Update(column field.Expr, value interface{}) (info gen.ResultInfo, err error)
 	UpdateSimple(columns ...field.AssignExpr) (info gen.ResultInfo, err error)
 	Updates(value interface{}) (info gen.ResultInfo, err error)
@@ -167,9 +320,9 @@ type IMeasurementDo interface {
 	Assign(attrs ...field.AssignExpr) IMeasurementDo
 	Joins(fields ...field.RelationField) IMeasurementDo
 	Preload(fields ...field.RelationField) IMeasurementDo
-	FirstOrInit() (*model.Measurement, error)
-	FirstOrCreate() (*model.Measurement, error)
-	FindByPage(offset int, limit int) (result []*model.Measurement, count int64, err error)
+	FirstOrInit() (*models.Measurement, error)
+	FirstOrCreate() (*models.Measurement, error)
+	FindByPage(offset int, limit int) (result []*models.Measurement, count int64, err error)
 	ScanByPage(result interface{}, offset int, limit int) (count int64, err error)
 	Scan(result interface{}) (err error)
 	Returning(value interface{}, columns ...string) IMeasurementDo
@@ -273,57 +426,57 @@ func (m measurementDo) Unscoped() IMeasurementDo {
 	return m.withDO(m.DO.Unscoped())
 }
 
-func (m measurementDo) Create(values ...*model.Measurement) error {
+func (m measurementDo) Create(values ...*models.Measurement) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return m.DO.Create(values)
 }
 
-func (m measurementDo) CreateInBatches(values []*model.Measurement, batchSize int) error {
+func (m measurementDo) CreateInBatches(values []*models.Measurement, batchSize int) error {
 	return m.DO.CreateInBatches(values, batchSize)
 }
 
 // Save : !!! underlying implementation is different with GORM
 // The method is equivalent to executing the statement: db.Clauses(clause.OnConflict{UpdateAll: true}).Create(values)
-func (m measurementDo) Save(values ...*model.Measurement) error {
+func (m measurementDo) Save(values ...*models.Measurement) error {
 	if len(values) == 0 {
 		return nil
 	}
 	return m.DO.Save(values)
 }
 
-func (m measurementDo) First() (*model.Measurement, error) {
+func (m measurementDo) First() (*models.Measurement, error) {
 	if result, err := m.DO.First(); err != nil {
 		return nil, err
 	} else {
-		return result.(*model.Measurement), nil
+		return result.(*models.Measurement), nil
 	}
 }
 
-func (m measurementDo) Take() (*model.Measurement, error) {
+func (m measurementDo) Take() (*models.Measurement, error) {
 	if result, err := m.DO.Take(); err != nil {
 		return nil, err
 	} else {
-		return result.(*model.Measurement), nil
+		return result.(*models.Measurement), nil
 	}
 }
 
-func (m measurementDo) Last() (*model.Measurement, error) {
+func (m measurementDo) Last() (*models.Measurement, error) {
 	if result, err := m.DO.Last(); err != nil {
 		return nil, err
 	} else {
-		return result.(*model.Measurement), nil
+		return result.(*models.Measurement), nil
 	}
 }
 
-func (m measurementDo) Find() ([]*model.Measurement, error) {
+func (m measurementDo) Find() ([]*models.Measurement, error) {
 	result, err := m.DO.Find()
-	return result.([]*model.Measurement), err
+	return result.([]*models.Measurement), err
 }
 
-func (m measurementDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*model.Measurement, err error) {
-	buf := make([]*model.Measurement, 0, batchSize)
+func (m measurementDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int) error) (results []*models.Measurement, err error) {
+	buf := make([]*models.Measurement, 0, batchSize)
 	err = m.DO.FindInBatches(&buf, batchSize, func(tx gen.Dao, batch int) error {
 		defer func() { results = append(results, buf...) }()
 		return fc(tx, batch)
@@ -331,7 +484,7 @@ func (m measurementDo) FindInBatch(batchSize int, fc func(tx gen.Dao, batch int)
 	return results, err
 }
 
-func (m measurementDo) FindInBatches(result *[]*model.Measurement, batchSize int, fc func(tx gen.Dao, batch int) error) error {
+func (m measurementDo) FindInBatches(result *[]*models.Measurement, batchSize int, fc func(tx gen.Dao, batch int) error) error {
 	return m.DO.FindInBatches(result, batchSize, fc)
 }
 
@@ -357,23 +510,23 @@ func (m measurementDo) Preload(fields ...field.RelationField) IMeasurementDo {
 	return &m
 }
 
-func (m measurementDo) FirstOrInit() (*model.Measurement, error) {
+func (m measurementDo) FirstOrInit() (*models.Measurement, error) {
 	if result, err := m.DO.FirstOrInit(); err != nil {
 		return nil, err
 	} else {
-		return result.(*model.Measurement), nil
+		return result.(*models.Measurement), nil
 	}
 }
 
-func (m measurementDo) FirstOrCreate() (*model.Measurement, error) {
+func (m measurementDo) FirstOrCreate() (*models.Measurement, error) {
 	if result, err := m.DO.FirstOrCreate(); err != nil {
 		return nil, err
 	} else {
-		return result.(*model.Measurement), nil
+		return result.(*models.Measurement), nil
 	}
 }
 
-func (m measurementDo) FindByPage(offset int, limit int) (result []*model.Measurement, count int64, err error) {
+func (m measurementDo) FindByPage(offset int, limit int) (result []*models.Measurement, count int64, err error) {
 	result, err = m.Offset(offset).Limit(limit).Find()
 	if err != nil {
 		return
@@ -402,7 +555,7 @@ func (m measurementDo) Scan(result interface{}) (err error) {
 	return m.DO.Scan(result)
 }
 
-func (m measurementDo) Delete(models ...*model.Measurement) (result gen.ResultInfo, err error) {
+func (m measurementDo) Delete(models ...*models.Measurement) (result gen.ResultInfo, err error) {
 	return m.DO.Delete(models)
 }
 

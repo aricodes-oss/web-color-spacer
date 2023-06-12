@@ -2,7 +2,7 @@ package main
 
 import (
 	"backend/db"
-	"backend/db/model"
+	"backend/models"
 
 	"gorm.io/gen"
 )
@@ -14,6 +14,6 @@ func main() {
 	})
 
 	g.UseDB(db.Connection)
-	g.ApplyBasic(model.AllModels...)
+	g.ApplyBasic(models.AllModels...)
 	g.Execute()
 }

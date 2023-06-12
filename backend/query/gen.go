@@ -17,17 +17,20 @@ import (
 
 var (
 	Q           = new(Query)
+	Color       *color
 	Measurement *measurement
 )
 
 func SetDefault(db *gorm.DB, opts ...gen.DOOption) {
 	*Q = *Use(db, opts...)
+	Color = &Q.Color
 	Measurement = &Q.Measurement
 }
 
 func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 	return &Query{
 		db:          db,
+		Color:       newColor(db, opts...),
 		Measurement: newMeasurement(db, opts...),
 	}
 }
@@ -35,6 +38,7 @@ func Use(db *gorm.DB, opts ...gen.DOOption) *Query {
 type Query struct {
 	db *gorm.DB
 
+	Color       color
 	Measurement measurement
 }
 
@@ -43,6 +47,7 @@ func (q *Query) Available() bool { return q.db != nil }
 func (q *Query) clone(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		Color:       q.Color.clone(db),
 		Measurement: q.Measurement.clone(db),
 	}
 }
@@ -58,16 +63,19 @@ func (q *Query) WriteDB() *Query {
 func (q *Query) ReplaceDB(db *gorm.DB) *Query {
 	return &Query{
 		db:          db,
+		Color:       q.Color.replaceDB(db),
 		Measurement: q.Measurement.replaceDB(db),
 	}
 }
 
 type queryCtx struct {
+	Color       IColorDo
 	Measurement IMeasurementDo
 }
 
 func (q *Query) WithContext(ctx context.Context) *queryCtx {
 	return &queryCtx{
+		Color:       q.Color.WithContext(ctx),
 		Measurement: q.Measurement.WithContext(ctx),
 	}
 }
