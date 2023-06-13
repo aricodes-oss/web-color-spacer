@@ -31,9 +31,9 @@ func newMeasurement(db *gorm.DB, opts ...gen.DOOption) measurement {
 	_measurement.CreatedAt = field.NewTime(tableName, "created_at")
 	_measurement.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_measurement.DeletedAt = field.NewField(tableName, "deleted_at")
-	_measurement.R = field.NewFloat64(tableName, "r")
-	_measurement.G = field.NewFloat64(tableName, "g")
-	_measurement.B = field.NewFloat64(tableName, "b")
+	_measurement.R = field.NewFloat64(tableName, "to_r")
+	_measurement.G = field.NewFloat64(tableName, "to_g")
+	_measurement.B = field.NewFloat64(tableName, "to_b")
 	_measurement.EndID = field.NewInt(tableName, "end_id")
 	_measurement.Distance = field.NewFloat64(tableName, "distance")
 
@@ -75,9 +75,9 @@ func (m *measurement) updateTableName(table string) *measurement {
 	m.CreatedAt = field.NewTime(table, "created_at")
 	m.UpdatedAt = field.NewTime(table, "updated_at")
 	m.DeletedAt = field.NewField(table, "deleted_at")
-	m.R = field.NewFloat64(table, "r")
-	m.G = field.NewFloat64(table, "g")
-	m.B = field.NewFloat64(table, "b")
+	m.R = field.NewFloat64(table, "to_r")
+	m.G = field.NewFloat64(table, "to_g")
+	m.B = field.NewFloat64(table, "to_b")
 	m.EndID = field.NewInt(table, "end_id")
 	m.Distance = field.NewFloat64(table, "distance")
 
@@ -101,9 +101,9 @@ func (m *measurement) fillFieldMap() {
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
 	m.fieldMap["deleted_at"] = m.DeletedAt
-	m.fieldMap["r"] = m.R
-	m.fieldMap["g"] = m.G
-	m.fieldMap["b"] = m.B
+	m.fieldMap["to_r"] = m.R
+	m.fieldMap["to_g"] = m.G
+	m.fieldMap["to_b"] = m.B
 	m.fieldMap["end_id"] = m.EndID
 	m.fieldMap["distance"] = m.Distance
 }
