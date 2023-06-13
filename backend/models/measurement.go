@@ -13,9 +13,8 @@ type Color struct {
 type Measurement struct {
 	gorm.Model
 
-	From  Color `json:"start" gorm:"embedded;embeddedPrefix:from_"`
-	To    Color `json:"end" gorm:"embedded;embeddedPrefix:to_"`
-	EndID int
+	From Color `json:"start" gorm:"embedded;embeddedPrefix:from_"`
+	To   Color `json:"end" gorm:"embedded;embeddedPrefix:to_"`
 
 	Distance float64 `json:"distance"`
 }

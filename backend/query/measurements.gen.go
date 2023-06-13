@@ -34,7 +34,6 @@ func newMeasurement(db *gorm.DB, opts ...gen.DOOption) measurement {
 	_measurement.R = field.NewFloat64(tableName, "to_r")
 	_measurement.G = field.NewFloat64(tableName, "to_g")
 	_measurement.B = field.NewFloat64(tableName, "to_b")
-	_measurement.EndID = field.NewInt(tableName, "end_id")
 	_measurement.Distance = field.NewFloat64(tableName, "distance")
 
 	_measurement.fillFieldMap()
@@ -53,7 +52,6 @@ type measurement struct {
 	R         field.Float64
 	G         field.Float64
 	B         field.Float64
-	EndID     field.Int
 	Distance  field.Float64
 
 	fieldMap map[string]field.Expr
@@ -78,7 +76,6 @@ func (m *measurement) updateTableName(table string) *measurement {
 	m.R = field.NewFloat64(table, "to_r")
 	m.G = field.NewFloat64(table, "to_g")
 	m.B = field.NewFloat64(table, "to_b")
-	m.EndID = field.NewInt(table, "end_id")
 	m.Distance = field.NewFloat64(table, "distance")
 
 	m.fillFieldMap()
@@ -96,7 +93,7 @@ func (m *measurement) GetFieldByName(fieldName string) (field.OrderExpr, bool) {
 }
 
 func (m *measurement) fillFieldMap() {
-	m.fieldMap = make(map[string]field.Expr, 9)
+	m.fieldMap = make(map[string]field.Expr, 8)
 	m.fieldMap["id"] = m.ID
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
@@ -104,7 +101,6 @@ func (m *measurement) fillFieldMap() {
 	m.fieldMap["to_r"] = m.R
 	m.fieldMap["to_g"] = m.G
 	m.fieldMap["to_b"] = m.B
-	m.fieldMap["end_id"] = m.EndID
 	m.fieldMap["distance"] = m.Distance
 }
 
