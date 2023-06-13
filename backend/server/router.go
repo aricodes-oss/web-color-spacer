@@ -10,7 +10,6 @@ func NewRouter() *gin.Engine {
 
 	measurements := &controllers.MeasurementController{}
 
-	// TODO: Mount routes in here
 	v1 := router.Group("v1")
 	measurementGroup := v1.Group("measurements")
 	measurements.Mount(measurementGroup)
