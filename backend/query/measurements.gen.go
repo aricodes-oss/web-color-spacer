@@ -31,20 +31,11 @@ func newMeasurement(db *gorm.DB, opts ...gen.DOOption) measurement {
 	_measurement.CreatedAt = field.NewTime(tableName, "created_at")
 	_measurement.UpdatedAt = field.NewTime(tableName, "updated_at")
 	_measurement.DeletedAt = field.NewField(tableName, "deleted_at")
-	_measurement.StartID = field.NewInt(tableName, "start_id")
+	_measurement.R = field.NewFloat64(tableName, "r")
+	_measurement.G = field.NewFloat64(tableName, "g")
+	_measurement.B = field.NewFloat64(tableName, "b")
 	_measurement.EndID = field.NewInt(tableName, "end_id")
 	_measurement.Distance = field.NewFloat64(tableName, "distance")
-	_measurement.Start = measurementBelongsToStart{
-		db: db.Session(&gorm.Session{}),
-
-		RelationField: field.NewRelation("Start", "models.Color"),
-	}
-
-	_measurement.End = measurementBelongsToEnd{
-		db: db.Session(&gorm.Session{}),
-
-		RelationField: field.NewRelation("End", "models.Color"),
-	}
 
 	_measurement.fillFieldMap()
 
@@ -59,12 +50,11 @@ type measurement struct {
 	CreatedAt field.Time
 	UpdatedAt field.Time
 	DeletedAt field.Field
-	StartID   field.Int
+	R         field.Float64
+	G         field.Float64
+	B         field.Float64
 	EndID     field.Int
 	Distance  field.Float64
-	Start     measurementBelongsToStart
-
-	End measurementBelongsToEnd
 
 	fieldMap map[string]field.Expr
 }
@@ -85,7 +75,9 @@ func (m *measurement) updateTableName(table string) *measurement {
 	m.CreatedAt = field.NewTime(table, "created_at")
 	m.UpdatedAt = field.NewTime(table, "updated_at")
 	m.DeletedAt = field.NewField(table, "deleted_at")
-	m.StartID = field.NewInt(table, "start_id")
+	m.R = field.NewFloat64(table, "r")
+	m.G = field.NewFloat64(table, "g")
+	m.B = field.NewFloat64(table, "b")
 	m.EndID = field.NewInt(table, "end_id")
 	m.Distance = field.NewFloat64(table, "distance")
 
@@ -109,10 +101,11 @@ func (m *measurement) fillFieldMap() {
 	m.fieldMap["created_at"] = m.CreatedAt
 	m.fieldMap["updated_at"] = m.UpdatedAt
 	m.fieldMap["deleted_at"] = m.DeletedAt
-	m.fieldMap["start_id"] = m.StartID
+	m.fieldMap["r"] = m.R
+	m.fieldMap["g"] = m.G
+	m.fieldMap["b"] = m.B
 	m.fieldMap["end_id"] = m.EndID
 	m.fieldMap["distance"] = m.Distance
-
 }
 
 func (m measurement) clone(db *gorm.DB) measurement {
@@ -123,148 +116,6 @@ func (m measurement) clone(db *gorm.DB) measurement {
 func (m measurement) replaceDB(db *gorm.DB) measurement {
 	m.measurementDo.ReplaceDB(db)
 	return m
-}
-
-type measurementBelongsToStart struct {
-	db *gorm.DB
-
-	field.RelationField
-}
-
-func (a measurementBelongsToStart) Where(conds ...field.Expr) *measurementBelongsToStart {
-	if len(conds) == 0 {
-		return &a
-	}
-
-	exprs := make([]clause.Expression, 0, len(conds))
-	for _, cond := range conds {
-		exprs = append(exprs, cond.BeCond().(clause.Expression))
-	}
-	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
-	return &a
-}
-
-func (a measurementBelongsToStart) WithContext(ctx context.Context) *measurementBelongsToStart {
-	a.db = a.db.WithContext(ctx)
-	return &a
-}
-
-func (a measurementBelongsToStart) Session(session *gorm.Session) *measurementBelongsToStart {
-	a.db = a.db.Session(session)
-	return &a
-}
-
-func (a measurementBelongsToStart) Model(m *models.Measurement) *measurementBelongsToStartTx {
-	return &measurementBelongsToStartTx{a.db.Model(m).Association(a.Name())}
-}
-
-type measurementBelongsToStartTx struct{ tx *gorm.Association }
-
-func (a measurementBelongsToStartTx) Find() (result *models.Color, err error) {
-	return result, a.tx.Find(&result)
-}
-
-func (a measurementBelongsToStartTx) Append(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Append(targetValues...)
-}
-
-func (a measurementBelongsToStartTx) Replace(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Replace(targetValues...)
-}
-
-func (a measurementBelongsToStartTx) Delete(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Delete(targetValues...)
-}
-
-func (a measurementBelongsToStartTx) Clear() error {
-	return a.tx.Clear()
-}
-
-func (a measurementBelongsToStartTx) Count() int64 {
-	return a.tx.Count()
-}
-
-type measurementBelongsToEnd struct {
-	db *gorm.DB
-
-	field.RelationField
-}
-
-func (a measurementBelongsToEnd) Where(conds ...field.Expr) *measurementBelongsToEnd {
-	if len(conds) == 0 {
-		return &a
-	}
-
-	exprs := make([]clause.Expression, 0, len(conds))
-	for _, cond := range conds {
-		exprs = append(exprs, cond.BeCond().(clause.Expression))
-	}
-	a.db = a.db.Clauses(clause.Where{Exprs: exprs})
-	return &a
-}
-
-func (a measurementBelongsToEnd) WithContext(ctx context.Context) *measurementBelongsToEnd {
-	a.db = a.db.WithContext(ctx)
-	return &a
-}
-
-func (a measurementBelongsToEnd) Session(session *gorm.Session) *measurementBelongsToEnd {
-	a.db = a.db.Session(session)
-	return &a
-}
-
-func (a measurementBelongsToEnd) Model(m *models.Measurement) *measurementBelongsToEndTx {
-	return &measurementBelongsToEndTx{a.db.Model(m).Association(a.Name())}
-}
-
-type measurementBelongsToEndTx struct{ tx *gorm.Association }
-
-func (a measurementBelongsToEndTx) Find() (result *models.Color, err error) {
-	return result, a.tx.Find(&result)
-}
-
-func (a measurementBelongsToEndTx) Append(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Append(targetValues...)
-}
-
-func (a measurementBelongsToEndTx) Replace(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Replace(targetValues...)
-}
-
-func (a measurementBelongsToEndTx) Delete(values ...*models.Color) (err error) {
-	targetValues := make([]interface{}, len(values))
-	for i, v := range values {
-		targetValues[i] = v
-	}
-	return a.tx.Delete(targetValues...)
-}
-
-func (a measurementBelongsToEndTx) Clear() error {
-	return a.tx.Clear()
-}
-
-func (a measurementBelongsToEndTx) Count() int64 {
-	return a.tx.Count()
 }
 
 type measurementDo struct{ gen.DO }

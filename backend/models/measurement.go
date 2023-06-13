@@ -5,8 +5,6 @@ import (
 )
 
 type Color struct {
-	gorm.Model
-
 	R float64 `json:"r"`
 	G float64 `json:"g"`
 	B float64 `json:"b"`
@@ -15,10 +13,8 @@ type Color struct {
 type Measurement struct {
 	gorm.Model
 
-	Start   Color `json:"start"`
-	StartID int
-
-	End   Color `json:"end"`
+	From  Color `json:"start" gorm:"embedded;embeddedPrefix:from_"`
+	To    Color `json:"end" gorm:"embeddedembeddedPrefix:to_"`
 	EndID int
 
 	Distance float64 `json:"distance"`
@@ -26,5 +22,4 @@ type Measurement struct {
 
 var AllModels = []any{
 	Measurement{},
-	Color{},
 }
