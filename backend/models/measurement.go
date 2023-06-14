@@ -13,6 +13,7 @@ type Color struct {
 type Measurement struct {
 	gorm.Model
 
+	ID   uint  `gorm:"primarykey" json:"id,omitempty"`
 	From Color `json:"start" gorm:"embedded;embeddedPrefix:from_"`
 	To   Color `json:"end" gorm:"embedded;embeddedPrefix:to_"`
 

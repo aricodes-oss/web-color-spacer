@@ -3,6 +3,7 @@ package controllers
 import (
 	"backend/models"
 	"backend/query"
+	"fmt"
 
 	"net/http"
 	"strconv"
@@ -32,6 +33,7 @@ func (m *MeasurementController) Create(c *gin.Context) {
 	var Measurement = query.Measurement
 	var entry models.Measurement
 	if err := c.BindJSON(&entry); err != nil {
+		fmt.Println(err)
 		return
 	}
 
