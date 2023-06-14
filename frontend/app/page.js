@@ -7,37 +7,41 @@ import classNames from 'classnames';
 import { useState } from 'react';
 
 export default function Home() {
-  const [r, setR] = useState(0);
-  const [g, setG] = useState(0);
-  const [b, setB] = useState(0);
+  const [l2, setL2] = useState(0);
+  const [l, setL] = useState(0); // l for lightness
+
+  let delta = 25
+  let ld = l2 + delta
 
   const onSubmit = async () => {
     const res = await axios.post('/v1/measurements/', {
-      start: { r, g, b },
+      start: { l2, l2, l2 },
       end: {
-        r: 255,
-        g: 255,
-        b: 255,
+        r: ld,
+        g: ld,
+        b: ld,
       },
 
-      distance: 127,
+      distance: l / delta, // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
     });
 
     console.log(res);
   };
 
   const counters = [
-    [r, setR],
-    [g, setG],
-    [b, setB],
+    [l2, setL2],
+    [l, setL],
   ];
 
   return (
     <main className={styles.main}>
       <div className={styles.row}>
-        <div className={classNames(styles.rectangle, styles.blue)} />
-        <div className={classNames(styles.rectangle, styles.red)} />
-        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${r}, ${g}, ${b})` }} />
+        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${l2}, ${l2}, ${l2})` }} />
+        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${ld}, ${ld}, ${ld})` }} />
+      </div>
+      <div className={styles.row}>
+        <div className={classNames(styles.rectangle, styles.black)} />
+        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${l}, ${l}, ${l})` }} />
       </div>
 
       {counters.map(([value, onChange], idx) => (
