@@ -5,6 +5,7 @@ import styles from './page.module.scss';
 import axios from 'axios';
 import classNames from 'classnames';
 import { useState } from 'react';
+import Plot from 'react-plotly.js'
 
 export default function Home() {
   const [l2, setL2] = useState(0);
@@ -15,7 +16,7 @@ export default function Home() {
 
   const onSubmit = async () => {
     const res = await axios.post('/v1/measurements/', {
-      start: { l2, l2, l2 },
+      start: { l2, l2, l2 }, // l2 tends to get updated to 0 before this is run?
       end: {
         r: ld,
         g: ld,
@@ -33,6 +34,11 @@ export default function Home() {
     [l, setL],
   ];
 
+  axios.get('/v1/measurements/').then(function (response) {
+    let a = response.data
+  })
+
+
   return (
     <main className={styles.main}>
       <div className={styles.row}>
@@ -49,6 +55,8 @@ export default function Home() {
       ))}
 
       <button onClick={onSubmit}>Submit</button>
+
+      <Plot data={[{ x: [0, 1, 2, 3], y: [0, 2, 1, 3], type: 'scatter', mode: 'markers' }]} layout={{ width: 320, height: 240 }} />
     </main>
   );
 }

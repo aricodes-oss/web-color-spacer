@@ -17,6 +17,7 @@ func (m *MeasurementController) Mount(group gin.IRouter) {
 	group.GET("/", m.All)
 	group.POST("/", m.Create)
 	group.PATCH("/:id", m.Patch)
+	group.DELETE("/:id", m.Delete)
 }
 
 func (m *MeasurementController) All(c *gin.Context) {
@@ -55,6 +56,18 @@ func (m *MeasurementController) Patch(c *gin.Context) {
 	}
 
 	info, err := Measurement.Where(Measurement.ID.Eq(uint(id))).Updates(body)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"info": info, "error": err})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"info": info})
+}
+
+func (m *MeasurementController) Delete(c *gin.Context) {
+	var Measurement = query.Measurement
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+
+	info, err := Measurement.Where(Measurement.ID.Eq(uint(id))).Delete()
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"info": info, "error": err})
 		return
