@@ -15,6 +15,7 @@ type MeasurementController struct{}
 
 func (m *MeasurementController) Mount(group gin.IRouter) {
 	group.GET("/", m.All)
+	group.GET("/:id", m.GetOne)
 	group.POST("/", m.Create)
 	group.PATCH("/:id", m.Patch)
 	group.DELETE("/:id", m.Delete)
@@ -28,6 +29,17 @@ func (m *MeasurementController) All(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, all)
+}
+
+func (m *MeasurementController) GetOne(c *gin.Context) {
+	var Measurement = query.Measurement
+	id, _ := strconv.ParseUint(c.Param("id"), 10, 32)
+	entry, err := Measurement.Where(Measurement.ID.Eq(uint(id))).First() // There should only be one, so First equals "only"
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err})
+		return
+	}
+	c.JSON(http.StatusOK, entry)
 }
 
 func (m *MeasurementController) Create(c *gin.Context) {
