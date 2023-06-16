@@ -22,7 +22,14 @@ export default function Home() {
     },
   });
 
-  console.log(query.data);
+  let xarray = []
+  let yarray = []
+  if (query.data !== undefined) {
+    query.data.forEach(element => {
+      xarray.push(element.start.r)
+      yarray.push(element.distance)
+    });
+  }
 
   const ld = l2 + DELTA;
 
@@ -68,7 +75,7 @@ export default function Home() {
       <button onClick={onSubmit}>Submit</button>
 
       <Plot
-        data={[{ x: [0, 1, 2, 3], y: [0, 2, 1, 3], type: 'scatter', mode: 'markers' }]}
+        data={[{ x: xarray, y: yarray, type: 'scatter', mode: 'markers' }]}
         layout={{ width: 320, height: 240 }}
       />
     </main>
