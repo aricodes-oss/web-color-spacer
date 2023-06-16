@@ -2,34 +2,27 @@
 
 import Counter from './counter';
 import styles from './page.module.scss';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import classNames from 'classnames';
 import { useState } from 'react';
 import Plot from 'react-plotly.js';
 
 const DELTA = 25;
+const QUERY_KEY = ['measurements'];
 
 export default function Home() {
   const [l2, setL2] = useState(0);
   const [l, setL] = useState(0); // l for lightness
+  const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: ['measurements'],
+    queryKey: QUERY_KEY,
     queryFn: async () => {
       const { data } = await axios.get('/v1/measurements/');
       return data;
     },
   });
-
-  let xarray = []
-  let yarray = []
-  if (query.data !== undefined) {
-    query.data.forEach(element => {
-      xarray.push(element.start.r)
-      yarray.push(element.distance)
-    });
-  }
 
   const ld = l2 + DELTA;
 
@@ -50,6 +43,7 @@ export default function Home() {
     });
 
     console.log(res);
+    queryClient.invalidateQueries({ queryKey: QUERY_KEY });
   };
 
   const counters = [
@@ -74,10 +68,19 @@ export default function Home() {
 
       <button onClick={onSubmit}>Submit</button>
 
-      <Plot
-        data={[{ x: xarray, y: yarray, type: 'scatter', mode: 'markers' }]}
-        layout={{ width: 320, height: 240 }}
-      />
+      {query.isSuccess && (
+        <Plot
+          data={[
+            {
+              x: query.data.map(e => e.start.r),
+              y: query.data.map(e => e.distance),
+              type: 'scatter',
+              mode: 'markers',
+            },
+          ]}
+          layout={{ width: 320, height: 240 }}
+        />
+      )}
     </main>
   );
 }
