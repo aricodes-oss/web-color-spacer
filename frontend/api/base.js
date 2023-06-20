@@ -13,6 +13,10 @@ class APIResource {
     return urlJoin(this.baseUrl, this.resource);
   }
 
+  get queryKey() {
+    return [this.resource];
+  }
+
   // Using arrow functions so that `this` is always bound to the  `APIResource` instance
   all = async () => await ky.get(this.path).json();
   create = async obj => await ky.post(this.path, { json: obj }).json();

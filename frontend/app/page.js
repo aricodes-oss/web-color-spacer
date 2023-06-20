@@ -14,7 +14,6 @@ import Stack from 'react-bootstrap/Stack';
 import Plot from 'react-plotly.js';
 
 const DELTA = 25;
-const QUERY_KEY = ['measurements'];
 
 export default function Home() {
   const [l2, setL2] = useState(0);
@@ -22,13 +21,13 @@ export default function Home() {
   const queryClient = useQueryClient();
 
   const query = useQuery({
-    queryKey: QUERY_KEY,
+    queryKey: measurements.queryKey,
     queryFn: measurements.all,
   });
   const mutation = useMutation({
     mutationFn: measurements.create,
     onSuccess: () => {
-      queryClient.invalidateQueries(QUERY_KEY);
+      queryClient.invalidateQueries(measurements.queryKey);
     },
   });
 
