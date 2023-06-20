@@ -56,7 +56,7 @@ func TestMeasurementsController(t *testing.T) {
 		t.Log(entry)
 	})
 
-	t.Run("GET /id", func(t *testing.T) {
+	t.Run("GET /:id", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/v1/measurements/1", nil)
 		router.ServeHTTP(w, req)
@@ -73,7 +73,7 @@ func TestMeasurementsController(t *testing.T) {
 		t.Log(entry)
 	})
 
-	t.Run("PATCH /id", func(t *testing.T) {
+	t.Run("PATCH /:id", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		entry := &models.Measurement{
 			From:     models.Color{R: 31, G: 41, B: 59},
@@ -96,14 +96,14 @@ func TestMeasurementsController(t *testing.T) {
 		t.Log(entry)
 	})
 
-	t.Run("DELETE /id", func(t *testing.T) {
+	t.Run("DELETE /:id", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("DELETE", "/v1/measurements/1", nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
-	t.Run("GET /id not found", func(t *testing.T) {
+	t.Run("GET /:id not found", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/v1/measurements/1", nil)
 		router.ServeHTTP(w, req)
