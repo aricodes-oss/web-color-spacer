@@ -52,7 +52,7 @@ export default function Home() {
   };
 
   const counters = [
-    [l2, setL2, 'L2'],
+    [l2, setL2],
     [lightness, setLightness, 'Lightness'],
   ];
 
