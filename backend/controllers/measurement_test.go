@@ -38,9 +38,6 @@ func TestMeasurementsController(t *testing.T) {
 
 	t.Run("POST /", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		// You're repeating the definition of From/To in both the request
-		// and the assertion body itself. I would recommend doing something
-		// like this instead:
 		var (
 			from  = models.Color{R: 0, G: 0, B: 0}
 			to    = models.Color{R: 1, G: 1, B: 1}
@@ -59,83 +56,94 @@ func TestMeasurementsController(t *testing.T) {
 			t.Error(err)
 		}
 
-		// ...so that you only have to update one spot when those values change
 		assert.Equal(t, http.StatusOK, w.Code)
 		assert.Equal(t, from, entry.From)
 		assert.Equal(t, to, entry.To)
 		assert.Equal(t, float64(255), entry.Distance)
 		t.Log(entry)
+
+		query.Measurement.Where(query.Measurement.ID.Eq(entry.ID)).Delete()
 	})
 
-	// This test assumes it is always run after `POST /`
-	// and that may not necessarily always be true. Each
-	// test should (ideally) manage its own setup and teardown
 	t.Run("GET /:id", func(t *testing.T) {
-		// Since this is pure Go application code you can run
-		// ORM queries directly to pre-seed your database
 		var (
-			from  = models.Color{R: 0, G: 0, B: 0}
-			to    = models.Color{R: 1, G: 1, B: 1}
-			entry = &models.Measurement{
+			from       = models.Color{R: 0, G: 0, B: 0}
+			to         = models.Color{R: 1, G: 1, B: 1}
+			setupEntry = &models.Measurement{
 				From:     from,
 				To:       to,
 				Distance: 255,
 			}
 		)
-		if err := query.Measurement.Create(entry); err != nil {
-			t.Errorf("Failed to create measurement %v", err)
+		if err := query.Measurement.Create(setupEntry); err != nil {
+			t.Errorf("Failed to create setup measurement %v", err)
 		}
 
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("GET", fmt.Sprintf("/v1/measurements/%d", entry.ID), nil)
+		req, _ := http.NewRequest("GET", fmt.Sprintf("/v1/measurements/%d", setupEntry.ID), nil)
 		router.ServeHTTP(w, req)
 
-		if err := json.Unmarshal(w.Body.Bytes(), entry); err != nil {
+		if err := json.Unmarshal(w.Body.Bytes(), setupEntry); err != nil {
 			t.Error(err)
 		}
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, models.Color{R: 0, G: 0, B: 0}, entry.From)
-		assert.Equal(t, models.Color{R: 1, G: 1, B: 1}, entry.To)
-		assert.Equal(t, float64(255), entry.Distance)
+		assert.Equal(t, models.Color{R: 0, G: 0, B: 0}, setupEntry.From)
+		assert.Equal(t, models.Color{R: 1, G: 1, B: 1}, setupEntry.To)
+		assert.Equal(t, float64(255), setupEntry.Distance)
 
-		query.Measurement.Where(query.Measurement.ID.Eq(entry.ID)).Delete()
+		query.Measurement.Where(query.Measurement.ID.Eq(setupEntry.ID)).Delete()
 
-		t.Log(entry)
+		t.Log(setupEntry)
 	})
 
 	t.Run("PATCH /:id", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		entry := &models.Measurement{
-			From:     models.Color{R: 31, G: 41, B: 59},
-			To:       models.Color{R: 26, G: 53, B: 58},
-			Distance: 97,
-		} // digits of pi
-		payload, _ := json.Marshal(entry)
+		var (
+			from         = models.Color{R: 31, G: 41, B: 59}
+			to           = models.Color{R: 26, G: 53, B: 58}
+			setupEntry   = &models.Measurement{}
+			desiredEntry = &models.Measurement{
+				From:     from,
+				To:       to,
+				Distance: 97,
+			} // digits of pi
+		)
+		payload, _ := json.Marshal(desiredEntry)
 
-		req, _ := http.NewRequest("PATCH", "/v1/measurements/1", bytes.NewReader(payload))
+		if err := query.Measurement.Create(setupEntry); err != nil {
+			t.Errorf("Failed to create setup measurement %v", err)
+		}
+
+		req, _ := http.NewRequest("PATCH", fmt.Sprintf("/v1/measurements/%d", setupEntry.ID), bytes.NewReader(payload))
 		router.ServeHTTP(w, req)
 
-		if err := json.Unmarshal(w.Body.Bytes(), entry); err != nil {
+		if err := json.Unmarshal(w.Body.Bytes(), desiredEntry); err != nil {
 			t.Error(err)
 		}
 
 		assert.Equal(t, http.StatusOK, w.Code)
-		assert.Equal(t, models.Color{R: 31, G: 41, B: 59}, entry.From)
-		assert.Equal(t, models.Color{R: 26, G: 53, B: 58}, entry.To)
-		assert.Equal(t, float64(97), entry.Distance)
-		t.Log(entry)
+		assert.Equal(t, from, desiredEntry.From)
+		assert.Equal(t, to, desiredEntry.To)
+		assert.Equal(t, float64(97), desiredEntry.Distance)
+		t.Log(desiredEntry)
+
+		query.Measurement.Where(query.Measurement.ID.Eq(setupEntry.ID)).Delete()
 	})
 
-	// Same note about test order dependency
 	t.Run("DELETE /:id", func(t *testing.T) {
 		w := httptest.NewRecorder()
-		req, _ := http.NewRequest("DELETE", "/v1/measurements/1", nil)
+		setupEntry := &models.Measurement{}
+
+		if err := query.Measurement.Create(setupEntry); err != nil {
+			t.Errorf("Failed to create setup measurement %v", err)
+		}
+
+		req, _ := http.NewRequest("DELETE", fmt.Sprintf("/v1/measurements/%d", setupEntry.ID), nil)
 		router.ServeHTTP(w, req)
 		assert.Equal(t, http.StatusOK, w.Code)
 	})
 
-	// Same note about test order dependency
 	t.Run("GET /:id not found", func(t *testing.T) {
 		w := httptest.NewRecorder()
 		req, _ := http.NewRequest("GET", "/v1/measurements/1", nil)
