@@ -17,7 +17,7 @@ const DELTA = 25;
 
 export default function Home() {
   const [l2, setL2] = useState(0);
-  const [lightness, setLightness] = useState(0); // l for lightness
+  const [lightness, setLightness] = useState(0);
   const queryClient = useQueryClient();
 
   const query = useQuery({
