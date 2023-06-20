@@ -1,31 +1,18 @@
 $box-edge: 128px;
+.rectangle {
+  display: flex-block;
+  min-width: $box-edge;
+  min-height: $box-edge;
 
-.main {
-  padding: 8px;
-
-  .row {
-    display: flex;
-    flex-direction: row;
-
-    >* {
-      margin: 0 0 0 0;
-    }
+  &.blue {
+    background-color: rgb(0, 0, 255);
   }
 
-  .rectangle {
-    width: $box-edge;
-    height: $box-edge;
+  &.red {
+    background-color: rgb(255, 0, 0);
+  }
 
-    &.blue {
-      background-color: rgb(0, 0, 255);
-    }
-
-    &.red {
-      background-color: rgb(255, 0, 0);
-    }
-
-    &.black {
-      background-color: rgb(0, 0, 0);
-    }
+  &.black {
+    background-color: rgb(0, 0, 0);
   }
 }

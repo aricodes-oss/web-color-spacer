@@ -6,6 +6,11 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import classNames from 'classnames';
 import { useState } from 'react';
+import Button from 'react-bootstrap/Button';
+import Col from 'react-bootstrap/Col';
+import Container from 'react-bootstrap/Container';
+import Row from 'react-bootstrap/Row';
+import Stack from 'react-bootstrap/Stack';
 import Plot from 'react-plotly.js';
 
 const DELTA = 25;
@@ -13,7 +18,7 @@ const QUERY_KEY = ['measurements'];
 
 export default function Home() {
   const [l2, setL2] = useState(0);
-  const [l, setL] = useState(0); // l for lightness
+  const [lightness, setLightness] = useState(0); // l for lightness
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -39,7 +44,7 @@ export default function Home() {
         b: ld,
       },
 
-      distance: l / DELTA, // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
+      distance: lightness / DELTA, // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
     });
 
     console.log(res);
@@ -47,26 +52,48 @@ export default function Home() {
   };
 
   const counters = [
-    [l2, setL2],
-    [l, setL],
+    [l2, setL2, 'L2'],
+    [lightness, setLightness, 'Lightness'],
   ];
 
   return (
-    <main className={styles.main}>
-      <div className={styles.row}>
-        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${l2}, ${l2}, ${l2})` }} />
-        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${ld}, ${ld}, ${ld})` }} />
-      </div>
-      <div className={styles.row}>
-        <div className={classNames(styles.rectangle, styles.black)} />
-        <div className={styles.rectangle} style={{ backgroundColor: `rgb(${l}, ${l}, ${l})` }} />
-      </div>
+    <Container>
+      <Row>
+        <Col>
+          <Stack>
+            <div
+              className={styles.rectangle}
+              style={{ backgroundColor: `rgb(${l2}, ${l2}, ${l2})` }}
+            />
+            <div
+              className={styles.rectangle}
+              style={{ backgroundColor: `rgb(${ld}, ${ld}, ${ld})` }}
+            />
+          </Stack>
+        </Col>
 
-      {counters.map(([value, onChange], idx) => (
-        <Counter value={value} onChange={onChange} key={idx} />
-      ))}
+        <Col>
+          <Stack>
+            <div className={classNames(styles.rectangle, styles.black)} />
+            <div
+              className={styles.rectangle}
+              style={{ backgroundColor: `rgb(${lightness}, ${lightness}, ${lightness})` }}
+            />
+          </Stack>
+        </Col>
+      </Row>
 
-      <button onClick={onSubmit}>Submit</button>
+      <Row>
+        {counters.map(([value, onChange, label], idx) => (
+          <Col key={idx}>
+            <Counter value={value} onChange={onChange} label={label} />
+          </Col>
+        ))}
+      </Row>
+
+      <Button variant="primary" onClick={onSubmit}>
+        Submit
+      </Button>
 
       {query.isSuccess && (
         <Plot
@@ -81,6 +108,6 @@ export default function Home() {
           layout={{ width: 320, height: 240 }}
         />
       )}
-    </main>
+    </Container>
   );
 }
