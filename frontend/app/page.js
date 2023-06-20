@@ -3,7 +3,7 @@
 import Counter from './counter';
 import styles from './page.module.scss';
 import { measurements } from '@/api';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import classNames from 'classnames';
 import { useState } from 'react';
@@ -26,28 +26,14 @@ export default function Home() {
     queryKey: QUERY_KEY,
     queryFn: measurements.all,
   });
+  const mutation = useMutation({
+    mutationFn: measurements.create,
+    onSuccess: () => {
+      queryClient.invalidateQueries(QUERY_KEY);
+    },
+  });
 
   const ld = l2 + DELTA;
-
-  const onSubmit = async () => {
-    const res = await axios.post('/v1/measurements/', {
-      start: {
-        r: l2,
-        g: l2,
-        b: l2,
-      }, // l2 tends to get updated to 0 before this is run?
-      end: {
-        r: ld,
-        g: ld,
-        b: ld,
-      },
-
-      distance: lightness / DELTA, // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
-    });
-
-    console.log(res);
-    queryClient.invalidateQueries({ queryKey: QUERY_KEY });
-  };
 
   const counters = [
     [l2, setL2],
@@ -89,7 +75,26 @@ export default function Home() {
         ))}
       </Row>
 
-      <Button variant="primary" onClick={onSubmit}>
+      <Button
+        variant="primary"
+        onClick={() =>
+          mutation.mutate({
+            start: {
+              r: l2,
+              g: l2,
+              b: l2,
+            },
+            end: {
+              r: ld,
+              g: ld,
+              b: ld,
+            },
+
+            // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
+            distance: lightness / DELTA,
+          })
+        }
+      >
         Submit
       </Button>
 
