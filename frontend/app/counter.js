@@ -1,4 +1,3 @@
-import styles from './page.module.scss';
 import PropTypes from 'prop-types';
 import Form from 'react-bootstrap/Form';
 
