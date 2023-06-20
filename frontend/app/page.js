@@ -4,7 +4,6 @@ import Counter from './counter';
 import styles from './page.module.scss';
 import { measurements } from '@/api';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import axios from 'axios';
 import classNames from 'classnames';
 import { useState } from 'react';
 import Button from 'react-bootstrap/Button';
