@@ -6,7 +6,13 @@ export default function Counter({ value, onChange, label }) {
   return (
     <Form.Group controlId={label}>
       {label && <Form.Label>{label}</Form.Label>}
-      <Form.Control type="number" value={value} onChange={e => onChange(Number(e.target.value))} />
+      <Form.Control
+        type="number"
+        value={value}
+        onChange={e => onChange(Number(e.target.value))}
+        min="0"
+        max="255"
+      />
     </Form.Group>
   );
 }
