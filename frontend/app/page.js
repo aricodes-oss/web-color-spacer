@@ -2,6 +2,7 @@
 
 import Counter from './counter';
 import styles from './page.module.scss';
+import { measurements } from '@/api';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import classNames from 'classnames';
@@ -23,10 +24,7 @@ export default function Home() {
 
   const query = useQuery({
     queryKey: QUERY_KEY,
-    queryFn: async () => {
-      const { data } = await axios.get('/v1/measurements/');
-      return data;
-    },
+    queryFn: measurements.all,
   });
 
   const ld = l2 + DELTA;
