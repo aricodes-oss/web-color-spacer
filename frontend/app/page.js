@@ -16,7 +16,12 @@ import Plot from 'react-plotly.js';
 const DELTA = 25;
 
 export default function Home() {
-  const [l2, setL2] = useState(0);
+  const [r1, setR1] = useState(0);
+  const [g1, setG1] = useState(0);
+  const [b1, setB1] = useState(0);
+  const [r2, setR2] = useState(0);
+  const [g2, setG2] = useState(0);
+  const [b2, setB2] = useState(0);
   const [lightness, setLightness] = useState(0);
   const queryClient = useQueryClient();
 
@@ -31,12 +36,17 @@ export default function Home() {
     },
   });
 
-  const ld = l2 + DELTA;
-
-  const counters = [
-    [l2, setL2],
-    [lightness, setLightness, 'Lightness'],
+  const countersL = [
+    [r1, setR1],
+    [g1, setG1],
+    [b1, setB1],
+    [r2, setR2],
+    [g2, setG2],
+    [b2, setB2],
   ];
+  const countersR = [
+    [lightness, setLightness, 'Lightness'],
+  ]
 
   return (
     <Container>
@@ -45,11 +55,11 @@ export default function Home() {
           <Stack>
             <div
               className={styles.rectangle}
-              style={{ backgroundColor: `rgb(${l2}, ${l2}, ${l2})` }}
+              style={{ backgroundColor: `rgb(${r1}, ${g1}, ${b1})` }}
             />
             <div
               className={styles.rectangle}
-              style={{ backgroundColor: `rgb(${ld}, ${ld}, ${ld})` }}
+              style={{ backgroundColor: `rgb(${r2}, ${g2}, ${b2})` }}
             />
           </Stack>
         </Col>
@@ -66,11 +76,16 @@ export default function Home() {
       </Row>
 
       <Row>
-        {counters.map(([value, onChange, label], idx) => (
-          <Col key={idx}>
-            <Counter value={value} onChange={onChange} label={label} />
-          </Col>
-        ))}
+        <Col>
+          {countersL.map(([value, onChange, label], idx) => (
+            <Counter key={idx} value={value} onChange={onChange} label={label} />
+          ))}
+        </Col>
+        <Col>
+          {countersR.map(([value, onChange, label], idx) => (
+            <Counter key={idx} value={value} onChange={onChange} label={label} />
+          ))}
+        </Col>
       </Row>
 
       <Button
@@ -78,18 +93,17 @@ export default function Home() {
         onClick={() =>
           mutation.mutate({
             start: {
-              r: l2,
-              g: l2,
-              b: l2,
+              r: r1,
+              g: g1,
+              b: b1,
             },
             end: {
-              r: ld,
-              g: ld,
-              b: ld,
+              r: r2,
+              g: g2,
+              b: b2,
             },
 
-            // if l is half of d, for example, then the scale factor is 1/2, i.e. the measured pair is half as distinct as black to d,d,d
-            distance: lightness / DELTA,
+            distance: lightness,
           })
         }
       >
@@ -111,4 +125,17 @@ export default function Home() {
       )}
     </Container>
   );
+}
+
+function cumulativeLength(query, lightness) {
+  let accumulator = 0
+  if (query.isSuccess) {
+    query.data.forEach(element => {
+      if (element.start.r == element.start.g && element.start.g == element.start.b && element.end.r == element.end.g && element.end.g == element.end.b) {
+        accumulator += element.distance / (element.end.r - element.start.r)
+      }
+    });
+    accumulator /= query.data.length
+  }
+  return accumulator * lightness // will return 0 when the query fails. that might not be what we want.
 }
