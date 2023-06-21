@@ -3,6 +3,7 @@
 import Counter from './counter';
 import styles from './page.module.scss';
 import { measurements } from '@/api';
+import { hexToRGB } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { useState } from 'react';
@@ -13,15 +14,10 @@ import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import Plot from 'react-plotly.js';
 
-const DELTA = 25;
-
 export default function Home() {
-  const [r1, setR1] = useState(0);
-  const [g1, setG1] = useState(0);
-  const [b1, setB1] = useState(0);
-  const [r2, setR2] = useState(0);
-  const [g2, setG2] = useState(0);
-  const [b2, setB2] = useState(0);
+  const [colorFrom, setColorFrom] = useState('#000000');
+  const [colorTo, setColorTo] = useState('#000000');
+
   const [lightness, setLightness] = useState(0);
   const queryClient = useQueryClient();
 
@@ -36,31 +32,15 @@ export default function Home() {
     },
   });
 
-  const countersL = [
-    [r1, setR1],
-    [g1, setG1],
-    [b1, setB1],
-    [r2, setR2],
-    [g2, setG2],
-    [b2, setB2],
-  ];
-  const countersR = [
-    [lightness, setLightness, 'Lightness'],
-  ]
+  const countersR = [[lightness, setLightness, 'Lightness']];
 
   return (
     <Container>
       <Row>
         <Col>
           <Stack>
-            <div
-              className={styles.rectangle}
-              style={{ backgroundColor: `rgb(${r1}, ${g1}, ${b1})` }}
-            />
-            <div
-              className={styles.rectangle}
-              style={{ backgroundColor: `rgb(${r2}, ${g2}, ${b2})` }}
-            />
+            <div className={styles.rectangle} style={{ backgroundColor: colorFrom }} />
+            <div className={styles.rectangle} style={{ backgroundColor: colorTo }} />
           </Stack>
         </Col>
 
@@ -77,14 +57,8 @@ export default function Home() {
 
       <Row>
         <Col>
-          {countersL.map(([value, onChange, label], idx) => (
-            <Counter key={idx} value={value} onChange={onChange} label={label} />
-          ))}
-        </Col>
-        <Col>
-          {countersR.map(([value, onChange, label], idx) => (
-            <Counter key={idx} value={value} onChange={onChange} label={label} />
-          ))}
+          <Counter value={colorFrom} onChange={setColorFrom} label="From" />
+          <Counter value={colorTo} onChange={setColorTo} label="To" />
         </Col>
       </Row>
 
@@ -92,16 +66,8 @@ export default function Home() {
         variant="primary"
         onClick={() =>
           mutation.mutate({
-            start: {
-              r: r1,
-              g: g1,
-              b: b1,
-            },
-            end: {
-              r: r2,
-              g: g2,
-              b: b2,
-            },
+            start: hexToRGB(colorFrom),
+            end: hexToRGB(colorTo),
 
             distance: lightness,
           })
@@ -128,14 +94,19 @@ export default function Home() {
 }
 
 function cumulativeLength(query, lightness) {
-  let accumulator = 0
+  let accumulator = 0;
   if (query.isSuccess) {
     query.data.forEach(element => {
-      if (element.start.r == element.start.g && element.start.g == element.start.b && element.end.r == element.end.g && element.end.g == element.end.b) {
-        accumulator += element.distance / (element.end.r - element.start.r)
+      if (
+        element.start.r == element.start.g &&
+        element.start.g == element.start.b &&
+        element.end.r == element.end.g &&
+        element.end.g == element.end.b
+      ) {
+        accumulator += element.distance / (element.end.r - element.start.r);
       }
     });
-    accumulator /= query.data.length
+    accumulator /= query.data.length;
   }
-  return accumulator * lightness // will return 0 when the query fails. that might not be what we want.
+  return accumulator * lightness; // will return 0 when the query fails. that might not be what we want.
 }

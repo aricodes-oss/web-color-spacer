@@ -6,11 +6,10 @@ export default function Counter({ value, onChange, label = 'Unlabeled Counter' }
     <Form.Group controlId={label}>
       {label && <Form.Label>{label}</Form.Label>}
       <Form.Control
-        type="number"
+        type="color"
         value={value}
-        onChange={e => onChange(Number(e.target.value))}
-        min="0"
-        max="255"
+        onChange={e => onChange(e.target.value)}
+        defaultValue="#000000"
       />
     </Form.Group>
   );
