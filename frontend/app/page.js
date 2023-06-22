@@ -1,5 +1,6 @@
 'use client';
 
+import ColorPicker from './colorpicker';
 import Counter from './counter';
 import styles from './page.module.scss';
 import { measurements } from '@/api';
@@ -57,8 +58,11 @@ export default function Home() {
 
       <Row>
         <Col>
-          <Counter value={colorFrom} onChange={setColorFrom} label="From" />
-          <Counter value={colorTo} onChange={setColorTo} label="To" />
+          <ColorPicker value={colorFrom} onChange={setColorFrom} label="From" />
+          <ColorPicker value={colorTo} onChange={setColorTo} label="To" />
+        </Col>
+        <Col>
+          <Counter value={lightness} onChange={setLightness} label="Compare" />
         </Col>
       </Row>
 
