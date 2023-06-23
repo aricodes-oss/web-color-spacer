@@ -33,8 +33,6 @@ export default function Home() {
     },
   });
 
-  const countersR = [[lightness, setLightness, 'Lightness']];
-
   return (
     <Container>
       <Row>
@@ -95,22 +93,4 @@ export default function Home() {
       )}
     </Container>
   );
-}
-
-function cumulativeLength(query, lightness) {
-  let accumulator = 0;
-  if (query.isSuccess) {
-    query.data.forEach(element => {
-      if (
-        element.start.r == element.start.g &&
-        element.start.g == element.start.b &&
-        element.end.r == element.end.g &&
-        element.end.g == element.end.b
-      ) {
-        accumulator += element.distance / (element.end.r - element.start.r);
-      }
-    });
-    accumulator /= query.data.length;
-  }
-  return accumulator * lightness; // will return 0 when the query fails. that might not be what we want.
 }
