@@ -1,5 +1,5 @@
-import LabeledFormControl from './LabeledFormControl';
 import PropTypes from 'prop-types';
+import LabeledFormControl from './LabeledFormControl';
 
 export default function Counter({
   label = 'Unlabeled Counter',
@@ -8,7 +8,16 @@ export default function Counter({
   defaultValue = 0,
   ...props
 }) {
-  return <LabeledFormControl label={label} type="number" min={min} max={max} {...props} />;
+  return (
+    <LabeledFormControl
+      label={label}
+      type="number"
+      min={min}
+      max={max}
+      defaultValue={defaultValue}
+      {...props}
+    />
+  );
 }
 
 Counter.propTypes = {

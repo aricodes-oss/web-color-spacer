@@ -3,6 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import { Inter } from 'next/font/google';
+import PropTypes from 'prop-types';
 import SSRProvider from 'react-bootstrap/SSRProvider';
 
 const queryClient = new QueryClient();
@@ -20,3 +21,7 @@ export default function RootLayout({ children }) {
     </html>
   );
 }
+
+RootLayout.propTypes = {
+  children: PropTypes.node,
+};

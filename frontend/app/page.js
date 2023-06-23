@@ -1,10 +1,5 @@
 'use client';
 
-import styles from './page.module.scss';
-import { measurements } from '@/api';
-import ColorPicker from '@/components/ColorPicker';
-import Counter from '@/components/Counter';
-import { hexToRGB } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { useState } from 'react';
@@ -14,6 +9,11 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Stack from 'react-bootstrap/Stack';
 import Plot from 'react-plotly.js';
+import { hexToRGB } from '@/utils';
+import Counter from '@/components/Counter';
+import ColorPicker from '@/components/ColorPicker';
+import { measurements } from '@/api';
+import styles from './page.module.scss';
 
 export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');

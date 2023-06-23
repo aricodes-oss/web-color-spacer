@@ -1,8 +1,9 @@
-import LabeledFormControl from './LabeledFormControl';
 import PropTypes from 'prop-types';
-import Form from 'react-bootstrap/Form';
+import LabeledFormControl from './LabeledFormControl';
 
-export default function ColorPicker({ label = 'Unlabeled Counter', ...props }) {
+const defaultLabel = 'Unlabeled Counter';
+
+export default function ColorPicker({ label = defaultLabel, ...props }) {
   return <LabeledFormControl label={label} type="color" defaultValue="#000000" {...props} />;
 }
 
