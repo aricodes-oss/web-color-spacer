@@ -33,6 +33,18 @@ export default function Home() {
     },
   });
 
+  // Hide the UI until we've loaded our data
+  // Note that this HAS TO COME AFTER ALL OF YOUR HOOKS (useWhatever functions)
+  // See here for more information - https://legacy.reactjs.org/docs/hooks-rules.html
+  if (query.isLoading) {
+    return null;
+  }
+
+  const cumulativeLength =
+    query.data
+      .filter(e => e.start.r === e.start.g && e.start.g === e.start.b)
+      .reduce((acc, val) => acc + val.distance / (val.end.r - val.start.r), 0) / query.data.length;
+
   return (
     <Container>
       <Row>
@@ -91,6 +103,8 @@ export default function Home() {
           layout={{ width: 320, height: 240 }}
         />
       )}
+
+      {cumulativeLength}
     </Container>
   );
 }
