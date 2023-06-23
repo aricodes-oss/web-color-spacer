@@ -17,7 +17,7 @@ export default function Counter({
       max={max}
       defaultValue={defaultValue}
       {...props}
-      onChange={e => onChange(Number(e.target.value))}
+      onChange={onChange}
     />
   );
 }
