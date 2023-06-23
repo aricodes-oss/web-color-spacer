@@ -42,8 +42,7 @@ export default function Home() {
   }
 
   // You wrote a very manual version of a reducer prior, but in JS that can be
-  // expressed much more succinctly. Check here for documentation on collection
-  // methods:
+  // expressed much more succinctly. Check here for documentation on collection methods:
   // https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce
   const cumulativeLength =
     query.data

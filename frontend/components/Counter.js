@@ -1,5 +1,5 @@
-import LabeledFormControl from './LabeledFormControl';
 import PropTypes from 'prop-types';
+import LabeledFormControl from './LabeledFormControl';
 
 export default function Counter({
   label = 'Unlabeled Counter',
