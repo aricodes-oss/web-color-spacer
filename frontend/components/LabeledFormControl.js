@@ -10,7 +10,7 @@ export default function LabeledFormControl({
   return (
     <Form.Group controlId={label}>
       {label && <Form.Label>{label}</Form.Label>}
-      <Form.Control value={value} onChange={e => onChange(Number(e.target.value))} {...props} />
+      <Form.Control value={value} onChange={e => onChange(e.target.value)} {...props} />
     </Form.Group>
   );
 }
