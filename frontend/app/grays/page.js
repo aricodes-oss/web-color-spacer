@@ -1,9 +1,7 @@
 'use client';
 
 import { measurements } from '@/api';
-import ColorPicker from '@/components/ColorPicker';
 import Counter from '@/components/Counter';
-import { hexToRGB } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import classNames from 'classnames';
 import { useState } from 'react';
