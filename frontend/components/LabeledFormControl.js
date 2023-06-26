@@ -16,7 +16,7 @@ export default function LabeledFormControl({
 }
 
 LabeledFormControl.propTypes = {
-  value: PropTypes.number.isRequired,
+  value: PropTypes.oneOfType([PropTypes.number, PropTypes.string]).isRequired,
   onChange: PropTypes.func.isRequired,
   label: PropTypes.string,
 };
