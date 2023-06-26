@@ -34,11 +34,13 @@ export default function ColorSample({ from, to, setFrom, setTo, onSubmit }) {
           <Stack>
             <div
               className={styles.rectangle}
-              style={{
-                backgroundColor: from,
-              }}
+              // using isNaN as a janky hack to check if it's hex or int, because it'll be a string either way for some reason
+              style={{ backgroundColor: isNaN(from) ? from : `rgb(${from},${from},${from})` }}
             />
-            <div className={styles.rectangle} style={{ backgroundColor: to }} />
+            <div
+              className={styles.rectangle}
+              style={{ backgroundColor: isNaN(to) ? to : `rgb(${to},${to},${to})` }}
+            />
           </Stack>
         </Col>
 
@@ -55,15 +57,20 @@ export default function ColorSample({ from, to, setFrom, setTo, onSubmit }) {
 
       <Row>
         <Col>
-          {typeof from === 'string' ? <ColorPicker {...fromProps} /> : <Counter {...fromProps} />}
-          {typeof to === 'string' ? <ColorPicker {...toProps} /> : <Counter {...toProps} />}
+          {isNaN(from) ? <ColorPicker {...fromProps} /> : <Counter {...fromProps} />}
+          {isNaN(to) ? <ColorPicker {...toProps} /> : <Counter {...toProps} />}
         </Col>
         <Col>
           <Counter value={lightness} onChange={setLightness} label="Compare" />
         </Col>
       </Row>
 
-      <Button variant="primary" onClick={onSubmit}>
+      <Button
+        variant="primary"
+        onClick={() => {
+          onSubmit(lightness);
+        }}
+      >
         Submit
       </Button>
     </Container>
