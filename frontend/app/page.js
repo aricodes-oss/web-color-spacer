@@ -51,9 +51,9 @@ export default function Home() {
     1 -
     (val.distance * cumulativeLength) /
       Math.sqrt(
-        coeffRed * Math.pow(val.end.r - val.start.r, 2) +
-          coeffGreen * Math.pow(val.end.g - val.start.g, 2) +
-          coeffBlue * Math.pow(val.end.b - val.start.b, 2),
+        coeffRed * (val.end.r - val.start.r) ** 2 +
+          coeffGreen * (val.end.g - val.start.g) ** 2 +
+          coeffBlue * (val.end.b - val.start.b) ** 2,
       );
 
   // Gradient descent
@@ -61,19 +61,19 @@ export default function Home() {
     coeffRed -=
       0.0000001 *
       query.data.reduce(
-        (acc, val) => acc + Math.pow(val.end.r - val.start.r, 2) * oneMinusLengthRatio(val),
+        (acc, val) => acc + (val.end.r - val.start.r) ** 2 * oneMinusLengthRatio(val),
         0,
       );
     coeffGreen -=
       0.0000001 *
       query.data.reduce(
-        (acc, val) => acc + Math.pow(val.end.g - val.start.g, 2) * oneMinusLengthRatio(val),
+        (acc, val) => acc + (val.end.g - val.start.g) ** 2 * oneMinusLengthRatio(val),
         0,
       );
     coeffBlue -=
       0.0000001 *
       query.data.reduce(
-        (acc, val) => acc + Math.pow(val.end.b - val.start.b, 2) * oneMinusLengthRatio(val),
+        (acc, val) => acc + (val.end.b - val.start.b) ** 2 * oneMinusLengthRatio(val),
         0,
       );
   }
