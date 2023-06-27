@@ -11,6 +11,9 @@ import Stack from 'react-bootstrap/Stack';
 import styles from './ColorSample.module.scss';
 import ColorPicker from './ColorPicker';
 
+const backgroundColorFrom = color =>
+  typeof color === 'string' ? color : `rgb(${color},${color},${color})`;
+
 export default function ColorSample({ from, to, setFrom, setTo, onSubmit }) {
   const [lightness, setLightness] = useState(0);
 
@@ -34,12 +37,11 @@ export default function ColorSample({ from, to, setFrom, setTo, onSubmit }) {
           <Stack>
             <div
               className={styles.rectangle}
-              // using isNaN as a janky hack to check if it's hex or int, because it'll be a string either way for some reason
-              style={{ backgroundColor: isNaN(from) ? from : `rgb(${from},${from},${from})` }}
+              style={{ backgroundColor: backgroundColorFrom(from) }}
             />
             <div
               className={styles.rectangle}
-              style={{ backgroundColor: isNaN(to) ? to : `rgb(${to},${to},${to})` }}
+              style={{ backgroundColor: backgroundColorFrom(to) }}
             />
           </Stack>
         </Col>
@@ -57,8 +59,8 @@ export default function ColorSample({ from, to, setFrom, setTo, onSubmit }) {
 
       <Row>
         <Col>
-          {isNaN(from) ? <ColorPicker {...fromProps} /> : <Counter {...fromProps} />}
-          {isNaN(to) ? <ColorPicker {...toProps} /> : <Counter {...toProps} />}
+          {typeof from === 'string' ? <ColorPicker {...fromProps} /> : <Counter {...fromProps} />}
+          {typeof to === 'string' ? <ColorPicker {...toProps} /> : <Counter {...toProps} />}
         </Col>
         <Col>
           <Counter value={lightness} onChange={setLightness} label="Compare" />

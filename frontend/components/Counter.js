@@ -20,7 +20,7 @@ export default function Counter({
       // note: the console yells at us if this is set, because LabeledFormControl always sets the value prop
       // defaultValue={defaultValue}
       {...props}
-      onChange={onChange}
+      onChange={val => onChange(Number(val))}
     />
   );
 }

@@ -28,16 +28,16 @@ export default function Home() {
     mutation.mutate({
       start: {
         // for some reason, lightnessFrom etc are becoming strings when updated
-        r: parseInt(lightnessFrom),
-        g: parseInt(lightnessFrom),
-        b: parseInt(lightnessFrom),
+        r: Number(lightnessFrom),
+        g: Number(lightnessFrom),
+        b: Number(lightnessFrom),
       },
       end: {
-        r: parseInt(lightnessTo),
-        g: parseInt(lightnessTo),
-        b: parseInt(lightnessTo),
+        r: Number(lightnessTo),
+        g: Number(lightnessTo),
+        b: Number(lightnessTo),
       },
-      distance: parseInt(lightness),
+      distance: Number(lightness),
     });
 
   if (query.isLoading) {
