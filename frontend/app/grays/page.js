@@ -27,7 +27,7 @@ export default function Home() {
   const onSubmit = lightness =>
     mutation.mutate({
       start: {
-        // for some reason, lightnessFrom etc are becoming strings when updated
+        // Probably fine to remove the Number() now, but I don't want to have to test to make sure
         r: Number(lightnessFrom),
         g: Number(lightnessFrom),
         b: Number(lightnessFrom),
@@ -44,6 +44,17 @@ export default function Home() {
     return null;
   }
 
+  const grays = query.data.filter(
+    e =>
+      e.start.r === e.start.g &&
+      e.start.g === e.start.b &&
+      e.end.r === e.end.g &&
+      e.end.g === e.end.b,
+  );
+
+  const cumulativeLength =
+    grays.reduce((acc, val) => acc + val.distance / (val.end.r - val.start.r), 0) / grays.length;
+
   return (
     <>
       <ColorSample
@@ -58,8 +69,8 @@ export default function Home() {
           <Plot
             data={[
               {
-                x: query.data.map(e => e.start.r),
-                y: query.data.map(e => e.distance),
+                x: grays.map(e => e.start.r),
+                y: grays.map(e => e.distance),
                 type: 'scatter',
                 mode: 'markers',
               },
@@ -67,6 +78,8 @@ export default function Home() {
             layout={{ width: 320, height: 240 }}
           />
         )}
+
+        {cumulativeLength}
       </Container>
     </>
   );
