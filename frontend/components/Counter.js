@@ -7,7 +7,6 @@ export default function Counter({
   max = 255,
   // defaultValue = 0,
   onChange,
-  value,
   ...props
 }) {
   return (
@@ -16,9 +15,6 @@ export default function Counter({
       type="number"
       min={min}
       max={max}
-      value={value}
-      // note: the console yells at us if this is set, because LabeledFormControl always sets the value prop
-      // defaultValue={defaultValue}
       {...props}
       onChange={val => onChange(Number(val))}
     />
