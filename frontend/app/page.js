@@ -56,26 +56,17 @@ export default function Home() {
           coeffBlue * (val.end.b - val.start.b) ** 2,
       );
 
+  const coeffReducer = key => (acc, val) =>
+    acc + (val.end[key] - val.start[key]) ** 2 * oneMinusLengthRatio(val);
+
+  // TODO: Name this better
+  const learningRate = 0.0000001;
+
   // Gradient descent
   for (let i = 0; i < 1000; i++) {
-    coeffRed -=
-      0.0000001 *
-      query.data.reduce(
-        (acc, val) => acc + (val.end.r - val.start.r) ** 2 * oneMinusLengthRatio(val),
-        0,
-      );
-    coeffGreen -=
-      0.0000001 *
-      query.data.reduce(
-        (acc, val) => acc + (val.end.g - val.start.g) ** 2 * oneMinusLengthRatio(val),
-        0,
-      );
-    coeffBlue -=
-      0.0000001 *
-      query.data.reduce(
-        (acc, val) => acc + (val.end.b - val.start.b) ** 2 * oneMinusLengthRatio(val),
-        0,
-      );
+    coeffRed -= learningRate * query.data.reduce(coeffReducer('r'), 0);
+    coeffGreen -= learningRate * query.data.reduce(coeffReducer('g'), 0);
+    coeffBlue -= learningRate * query.data.reduce(coeffReducer('b'), 0);
   }
 
   const onSubmit = lightness =>
