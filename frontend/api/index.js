@@ -1,3 +1,1 @@
-import APIResource from './base';
-
-export const measurements = new APIResource('measurements');
+export { default as measurements } from './measurements';

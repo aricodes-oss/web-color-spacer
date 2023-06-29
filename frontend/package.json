@@ -24,9 +24,12 @@
     "react-dom": "18.2.0",
     "react-plotly.js": "^2.6.0",
     "sass": "^1.63.3",
+    "serializr": "^3.0.2",
     "url-join": "^5.0.0"
   },
   "devDependencies": {
+    "@babel/eslint-parser": "^7.22.5",
+    "@babel/plugin-syntax-import-assertions": "^7.22.5",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^8.8.0",
     "eslint-import-resolver-alias": "^1.1.2",
