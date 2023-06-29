@@ -3,8 +3,8 @@ import { createModelSchema, primitive, object, identifier } from 'serializr';
 
 class Measurement {
   id = 0;
-  from = new Color();
-  to = new Color();
+  start = new Color();
+  end = new Color();
 
   distance = 0;
 }
