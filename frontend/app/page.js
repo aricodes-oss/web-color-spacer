@@ -1,12 +1,14 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { measurements } from '@/api';
 import ColorSample from '@/components/ColorSample';
 import { hexToRGB } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import Container from 'react-bootstrap/Container';
-import Plot from 'react-plotly.js';
+
+const Plot = dynamic(() => import('react-plotly.js', { ssr: false }));
 
 export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
@@ -29,13 +31,7 @@ export default function Home() {
     return null;
   }
 
-  const grays = query.data.filter(
-    e =>
-      e.start.r === e.start.g &&
-      e.start.g === e.start.b &&
-      e.end.r === e.end.g &&
-      e.end.g === e.end.b,
-  );
+  const grays = query.data.filter(e => e.start.gray && e.end.gray);
 
   const cumulativeLength =
     grays.reduce((acc, val) => acc + val.distance / (val.end.r - val.start.r), 0) / grays.length;
