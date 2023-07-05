@@ -7,6 +7,7 @@ import { hexToRGB } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState } from 'react';
 import Container from 'react-bootstrap/Container';
+import { Stage } from 'react-konva';
 
 const Plot = dynamic(() => import('react-plotly.js', { ssr: false }));
 
