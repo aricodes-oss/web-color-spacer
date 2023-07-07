@@ -3,6 +3,7 @@
 import { measurements } from '@/api';
 import ColorSample from '@/components/ColorSample';
 import { hexToRGB } from '@/utils';
+import { gradientColors } from '@/utils/gradientcolors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
@@ -99,8 +100,7 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-
-      <Gradient points={query.data} size={50} />
+      <Gradient points={gradientColors(coeffBlue, 'B', coeffGreen, 'G', 150)} size={20} />
     </>
   );
 }
