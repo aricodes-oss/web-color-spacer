@@ -1,3 +1,4 @@
+import { rgbToHex } from '@/utils';
 import { createModelSchema, primitive } from 'serializr';
 
 class Color {
@@ -7,6 +8,10 @@ class Color {
 
   get gray() {
     return this.r === this.g && this.g === this.b;
+  }
+
+  get hex() {
+    return rgbToHex(this);
   }
 }
 

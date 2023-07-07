@@ -100,7 +100,7 @@ export default function Home() {
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
 
-      <Gradient />
+      <Gradient points={query.data} size={50} />
     </>
   );
 }

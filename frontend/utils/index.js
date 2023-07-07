@@ -6,3 +6,13 @@ export function hexToRGB(hex) {
     b: parseInt(m[3], 16),
   };
 }
+
+export function componentToHex(c) {
+  const hex = c.toString(16);
+  return hex.length === 1 ? `0${hex}` : hex;
+}
+
+export function rgbToHex({ r, g, b }) {
+  const f = componentToHex;
+  return `#${f(r)}${f(g)}${f(b)}`;
+}
