@@ -35,6 +35,4 @@ Gradient.propTypes = {
   ).isRequired,
 
   size: PropTypes.number,
-  rows: PropTypes.number,
-  columns: PropTypes.number,
 };
