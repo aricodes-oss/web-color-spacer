@@ -6,14 +6,14 @@ export default function Gradient({ points, size = 10 }) {
   return (
     <Stage width={640} height={480}>
       <Layer>
-        {points.map((row, idxr) =>
-          row.map((point, idx) => (
+        {points.map((colIdx, rowIdx) =>
+          colIdx.map((point, idx) => (
             <Rect
-              key={idx}
+              key={`${idx},${rowIdx}`}
               width={size}
               height={size}
               x={Math.trunc(idx) * size}
-              y={Math.trunc(idxr) * size}
+              y={Math.trunc(rowIdx) * size}
               fill={rgbToHex(point)}
             />
           )),
