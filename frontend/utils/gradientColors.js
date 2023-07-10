@@ -1,4 +1,4 @@
-export function gradientColors(coeff1, c1Color, coeff2, c2Color, offset) {
+export default function gradientColors(coeff1, c1Color, coeff2, c2Color, offset) {
   var gradientRows = [];
   for (let i = 0; i < 255; i += 17 / Math.sqrt(coeff1)) {
     var gradientPoints = [];

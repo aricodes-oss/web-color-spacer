@@ -1,3 +1,5 @@
+export { default as gradientColors } from './gradientColors';
+
 export function hexToRGB(hex) {
   var m = hex.match(/^#?([\da-f]{2})([\da-f]{2})([\da-f]{2})$/i);
   return {
