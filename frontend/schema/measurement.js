@@ -7,6 +7,10 @@ class Measurement {
   end = new Color();
 
   distance = 0;
+
+  get gray() {
+    return this.start.gray && this.end.gray;
+  }
 }
 
 createModelSchema(Measurement, {
