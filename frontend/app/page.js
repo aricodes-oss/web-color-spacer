@@ -3,7 +3,7 @@
 import { measurements } from '@/api';
 import ColorSample from '@/components/ColorSample';
 import { hexToRGB } from '@/utils';
-import { gradientColors } from '@/utils/gradientcolors';
+import { gradientColors } from '@/utils/gradientColors';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
 import { useState } from 'react';
