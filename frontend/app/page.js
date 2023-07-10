@@ -32,7 +32,7 @@ export default function Home() {
     return null;
   }
 
-  const grays = query.data.filter(e => e.start.gray && e.end.gray);
+  const grays = query.data.filter(e => e.gray);
 
   const cumulativeLength =
     grays.reduce((acc, val) => acc + val.distance / (val.end.r - val.start.r), 0) / grays.length;
