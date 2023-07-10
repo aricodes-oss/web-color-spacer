@@ -1,21 +1,16 @@
-export default function gradientColors(coeff1, c1Color, coeff2, c2Color, offset) {
-  var gradientRows = [];
-  for (let i = 0; i < 255; i += 17 / Math.sqrt(coeff1)) {
-    var gradientPoints = [];
-    for (let j = 0; j < 255; j += 17 / Math.sqrt(coeff2)) {
-      var point = { r: offset, g: offset, b: offset };
-      const pointKeys = Object.keys(point);
+export default function gradientColors(coefficients, offset, scale = 17) {
+  const [xAxis, yAxis] = Object.keys(coefficients);
+  const point = { r: offset, g: offset, b: offset };
 
-      if (!pointKeys.includes(c1Color) || !pointKeys.includes(c2Color)) {
-        console.log(`c1:${c1Color} c2:${c2Color}`);
-      }
+  const rows = [];
 
-      point[c1Color.toLowerCase()] = Math.trunc(i);
-      point[c2Color.toLowerCase()] = Math.trunc(j);
-
-      gradientPoints.push(point);
+  for (let i = 0; i < 255; i += scale / Math.sqrt(coefficients[xAxis])) {
+    const points = [];
+    for (let j = 0; j < 255; j += scale / Math.sqrt(coefficients[yAxis])) {
+      points.push({ ...point, [xAxis]: Math.trunc(i), [yAxis]: Math.trunc(j) });
     }
-    gradientRows.push(gradientPoints);
+    rows.push(points);
   }
-  return gradientRows;
+
+  return rows;
 }

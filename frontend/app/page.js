@@ -99,7 +99,7 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-      <Gradient points={gradientColors(coeffBlue, 'B', coeffGreen, 'G', 150)} size={20} />
+      <Gradient points={gradientColors({ b: coeffBlue, g: coeffGreen }, 150)} size={20} />
     </>
   );
 }
