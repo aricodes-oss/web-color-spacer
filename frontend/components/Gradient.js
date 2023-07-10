@@ -1,6 +1,7 @@
+/* eslint-disable react/no-array-index-key */
+import { rgbToHex } from '@/utils';
 import PropTypes from 'prop-types';
 import { Stage, Layer, Rect } from 'react-konva';
-import { rgbToHex } from '@/utils';
 
 export default function Gradient({ points, size = 10 }) {
   return (
@@ -36,3 +37,4 @@ Gradient.propTypes = {
 
   size: PropTypes.number,
 };
+/* eslint-enable react/no-array-index-key */
