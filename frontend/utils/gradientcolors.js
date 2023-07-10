@@ -4,32 +4,15 @@ export function gradientColors(coeff1, c1Color, coeff2, c2Color, offset) {
     var gradientPoints = [];
     for (let j = 0; j < 255; j += 17 / Math.sqrt(coeff2)) {
       var point = { r: offset, g: offset, b: offset };
-      switch (c1Color) {
-        case 'R':
-          point.r = Math.trunc(i);
-          break;
-        case 'G':
-          point.g = Math.trunc(i);
-          break;
-        case 'B':
-          point.b = Math.trunc(i);
-          break;
-        default:
-          console.log('c1Color not R, G, or B');
+      const pointKeys = Object.keys(point);
+
+      if (!pointKeys.includes(c1Color) || !pointKeys.includes(c2Color)) {
+        console.log(`c1:${c1Color} c2:${c2Color}`);
       }
-      switch (c2Color) {
-        case 'R':
-          point.r = Math.trunc(j);
-          break;
-        case 'G':
-          point.g = Math.trunc(j);
-          break;
-        case 'B':
-          point.b = Math.trunc(j);
-          break;
-        default:
-          console.log('c2Color not R, G, or B');
-      }
+
+      point[c1Color.toLowerCase()] = Math.trunc(i);
+      point[c2Color.toLowerCase()] = Math.trunc(j);
+
       gradientPoints.push(point);
     }
     gradientRows.push(gradientPoints);
