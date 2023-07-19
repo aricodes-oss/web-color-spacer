@@ -1,14 +1,15 @@
 'use client';
 
-import dynamic from 'next/dynamic';
 import { measurements } from '@/api';
 import ColorSample from '@/components/ColorSample';
-import { hexToRGB } from '@/utils';
+import { hexToRGB, gradientColors } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import dynamic from 'next/dynamic';
 import { useState } from 'react';
 import Container from 'react-bootstrap/Container';
 
-const Plot = dynamic(() => import('react-plotly.js', { ssr: false }));
+const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
+const Gradient = dynamic(() => import('../components/Gradient'), { ssr: false });
 
 export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
@@ -31,7 +32,7 @@ export default function Home() {
     return null;
   }
 
-  const grays = query.data.filter(e => e.start.gray && e.end.gray);
+  const grays = query.data.filter(e => e.gray);
 
   const cumulativeLength =
     grays.reduce((acc, val) => acc + val.distance / (val.end.r - val.start.r), 0) / grays.length;
@@ -98,6 +99,7 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
+      <Gradient points={gradientColors({ b: coeffBlue, g: coeffGreen }, 150)} size={20} />
     </>
   );
 }

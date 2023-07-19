@@ -76,7 +76,6 @@ module.exports = {
     'react/jsx-props-no-spreading': ['off'],
     'react/forbid-prop-types': ['off'],
     'react/no-unescaped-entities': ['off'],
-    'react/no-array-index-key': ['off'],
     'jsx-a11y/no-static-element-interactions': ['off'],
 
     // For components that appear more than once, this is impossible
