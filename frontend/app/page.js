@@ -11,6 +11,24 @@ import Container from 'react-bootstrap/Container';
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 const Gradient = dynamic(() => import('../components/Gradient'), { ssr: false });
 
+/*
+function rgbToOutput(rgbColor) {
+  return {
+    x: rgbColor.r + 0.5 * rgbColor.g,
+    y: rgbColor.g + 0.5 * rgbColor.r,
+    z: rgbColor.b + 0.2 * rgbColor.g + 0.2 * rgbColor.r,
+  };
+}
+*/
+
+function outputToRGB(color) {
+  return {
+    r: Math.trunc((4 / 3) * (color.x - 0.5 * color.y)),
+    g: Math.trunc((4 / 3) * (color.y - 0.5 * color.x)),
+    b: Math.trunc(color.z - (4 / 15) * (0.5 * color.x + 0.5 * color.y)),
+  };
+}
+
 export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
   const [colorTo, setColorTo] = useState('#000000');
@@ -102,20 +120,4 @@ export default function Home() {
       <Gradient points={gradientColors(outputToRGB, 280)} size={20} />
     </>
   );
-}
-
-function rgbToOutput(rgbColor) {
-  return {
-    x: rgbColor.r + 0.5 * rgbColor.g,
-    y: rgbColor.g + 0.5 * rgbColor.r,
-    z: rgbColor.b + 0.2 * rgbColor.g + 0.2 * rgbColor.r,
-  };
-}
-
-function outputToRGB(color) {
-  return {
-    r: Math.trunc((4 / 3) * (color.x - 0.5 * color.y)),
-    g: Math.trunc((4 / 3) * (color.y - 0.5 * color.x)),
-    b: Math.trunc(color.z - (4 / 15) * (0.5 * color.x + 0.5 * color.y)),
-  };
 }
