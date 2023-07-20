@@ -99,7 +99,23 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-      <Gradient points={gradientColors({ b: coeffBlue, g: coeffGreen }, 150)} size={20} />
+      <Gradient points={gradientColors(outputToRGB, 280)} size={20} />
     </>
   );
+}
+
+function rgbToOutput(rgbColor) {
+  return {
+    x: rgbColor.r + 0.5 * rgbColor.g,
+    y: rgbColor.g + 0.5 * rgbColor.r,
+    z: rgbColor.b + 0.2 * rgbColor.g + 0.2 * rgbColor.r,
+  };
+}
+
+function outputToRGB(color) {
+  return {
+    r: Math.trunc((4 / 3) * (color.x - 0.5 * color.y)),
+    g: Math.trunc((4 / 3) * (color.y - 0.5 * color.x)),
+    b: Math.trunc(color.z - (4 / 15) * (0.5 * color.x + 0.5 * color.y)),
+  };
 }

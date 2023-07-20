@@ -13,9 +13,9 @@ export default function Gradient({ points, size = 10 }) {
               key={`${idx},${rowIdx}`}
               width={size}
               height={size}
-              x={Math.trunc(idx) * size}
+              x={point.x * size}
               y={Math.trunc(rowIdx) * size}
-              fill={rgbToHex(point)}
+              fill={rgbToHex(point.color)}
             />
           )),
         )}
@@ -28,9 +28,12 @@ Gradient.propTypes = {
   points: PropTypes.arrayOf(
     PropTypes.arrayOf(
       PropTypes.shape({
-        r: PropTypes.number,
-        g: PropTypes.number,
-        b: PropTypes.number,
+        color: PropTypes.shape({
+          r: PropTypes.number,
+          g: PropTypes.number,
+          b: PropTypes.number,
+        }),
+        x: PropTypes.number,
       }),
     ),
   ).isRequired,
