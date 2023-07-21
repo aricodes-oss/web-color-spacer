@@ -11,7 +11,6 @@ import Container from 'react-bootstrap/Container';
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
 const Gradient = dynamic(() => import('../components/Gradient'), { ssr: false });
 
-/*
 function rgbToOutput(rgbColor) {
   return {
     x: rgbColor.r + 0.5 * rgbColor.g,
@@ -19,7 +18,6 @@ function rgbToOutput(rgbColor) {
     z: rgbColor.b + 0.2 * rgbColor.g + 0.2 * rgbColor.r,
   };
 }
-*/
 
 function outputToRGB(color) {
   return {
@@ -117,7 +115,7 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-      <Gradient points={gradientColors(outputToRGB, 280)} size={20} />
+      <Gradient points={gradientColors(rgbToOutput, outputToRGB, 280)} size={20} />
     </>
   );
 }
