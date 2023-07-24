@@ -97,6 +97,9 @@ module.exports = {
 
     // defaultProps is being deprecated in favor of function defaults
     'react/require-default-props': ['off'],
+
+    // We always want strict equality
+    eqeqeq: ['error', 'always'],
   },
 
   settings: {
