@@ -7,7 +7,7 @@ import { Color } from '@/schema';
 import { hexToRGB, gradientColors } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import Container from 'react-bootstrap/Container';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -17,6 +17,7 @@ export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
   const [colorTo, setColorTo] = useState('#000000');
   const [offset, setOffset] = useState(0);
+  const [transitionPending, startTransition] = useTransition();
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -76,9 +77,6 @@ export default function Home() {
       distance: lightness,
     });
 
-  // Generate planes of color
-  const planes = gradientColors(Color.from({ r: 128, g: 128, b: 128 }));
-
   return (
     <>
       <ColorSample
@@ -105,15 +103,26 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-      <Counter value={offset} onChange={setOffset} label="Layer Offset" min={-255} />
-      <Gradient
-        planes={planes}
-        size={20}
-        offset={
-          // it might be better to handle the offset counter within the gradient component rather than manually out here
-          offset
+      <Counter
+        value={offset}
+        onChange={e =>
+          startTransition(() => {
+            setOffset(e);
+          })
         }
+        label="Layer Offset"
+        min={-255}
       />
+      {!transitionPending && (
+        <Gradient
+          planes={gradientColors(Color.from({ r: 128, g: 128, b: 128 }))}
+          size={20}
+          offset={
+            // it might be better to handle the offset counter within the gradient component rather than manually out here
+            offset
+          }
+        />
+      )}
     </>
   );
 }
