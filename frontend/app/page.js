@@ -2,6 +2,7 @@
 
 import { measurements } from '@/api';
 import ColorSample from '@/components/ColorSample';
+import Counter from '@/components/Counter';
 import { hexToRGB, gradientColors } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
@@ -30,6 +31,7 @@ function outputToRGB(color) {
 export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
   const [colorTo, setColorTo] = useState('#000000');
+  const [offset, setOffset] = useState(0);
   const queryClient = useQueryClient();
 
   const query = useQuery({
@@ -89,6 +91,9 @@ export default function Home() {
       distance: lightness,
     });
 
+  // Generate planes of color
+  const planes = gradientColors(rgbToOutput, outputToRGB, { r: 128, g: 128, b: 128 });
+
   return (
     <>
       <ColorSample
@@ -115,7 +120,15 @@ export default function Home() {
         )}
         {Math.sqrt(coeffRed)}, {Math.sqrt(coeffGreen)}, {Math.sqrt(coeffBlue)}
       </Container>
-      <Gradient points={gradientColors(rgbToOutput, outputToRGB, 280)} size={20} />
+      <Counter value={offset} onChange={setOffset} label="Layer Offset" min={-255} />
+      <Gradient
+        planes={planes}
+        size={20}
+        offset={
+          // it might be better to handle the offset counter within the gradient component rather than manually out here
+          offset
+        }
+      />
     </>
   );
 }

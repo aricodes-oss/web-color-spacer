@@ -1,4 +1,4 @@
-export default function gradientColors(fromRGB, toRGB, offset, baseInterval = 17) {
+export default function gradientColors(fromRGB, toRGB, startingColor, baseInterval = 17) {
   /*const rows = [];
 
   let i = 0;
@@ -18,98 +18,68 @@ export default function gradientColors(fromRGB, toRGB, offset, baseInterval = 17
 
   return rows;*/
 
-  const points = [
-    { color: { r: 128, g: 128, b: 128 }, position: fromRGB({ r: 128, g: 128, b: 128 }) },
-  ];
+  const planes = {
+    center: 0,
+    boundaries: { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 },
+    points: [[{ color: startingColor, position: { x: 0, y: 0, z: 0 } }]],
+  };
 
   let boundaries = { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 };
-  let lastBoundaries = { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 };
+  let lastBoundaries = { u: -1, d: -1, l: -1, r: -1, f: -1, b: -1 };
 
-  function keyPosHelper(faceKey, i, j) {
-    switch (faceKey) {
-      case u:
-        return { x: i, y: j, z: lastBoundaries.u + baseInterval };
-      case d:
-        return { x: i, y: j, z: -lastBoundaries.d - baseInterval };
-      case l:
-        return { x: -lastBoundaries.l - baseInterval, y: i, z: j };
-      case r:
-        return { x: lastBoundaries.r + baseInterval, y: i, z: j };
-      case f:
-        return { x: i, y: lastBoundaries.f + baseInterval, z: j };
-      case b:
-        return { x: i, y: -lastBoundaries.f - baseInterval, z: j };
-      default:
-      // idk
-    }
-  }
-
-  function faceExpand(faceKey, lowBound1, highBound1, lowBound2, highBound2) {
-    for (let i = lowBound1; i <= highBound1; i += baseInterval) {
-      for (let j = lowBound2; j <= highBound2; j += baseInterval) {
-        testPos = positionsSum(points[0].position, keyPosHelper(faceKey, i, j));
-        if (isValidColor(toRGB, testPos)) {
-          boundaries[faceKey] = lastBoundaries[faceKey] + baseInterval;
-          points.push({ color: toRGB(testPos), position: {} });
+  while (!boundariesEqual(boundaries, lastBoundaries)) {
+    lastBoundaries = { ...boundaries };
+    for (let i = lastBoundaries.d - 1; i <= lastBoundaries.u + 1; i++) {
+      for (let j = lastBoundaries.l - 1; j <= lastBoundaries.r + 1; j++) {
+        for (
+          let k = lastBoundaries.b - 1;
+          k <= lastBoundaries.f + 1;
+          k =
+            i == lastBoundaries.d - 1 ||
+            i == lastBoundaries.u + 1 ||
+            j == lastBoundaries.l - 1 ||
+            j == lastBoundaries.r + 1 ||
+            k == lastBoundaries.f + 1
+              ? k + 1
+              : lastBoundaries.f + 1
+        ) {
+          // TODO: implement change of orientation
+          let pos = positionsSum(fromRGB(planes.points[planes.center][0].color), {
+            x: i * baseInterval,
+            y: j * baseInterval,
+            z: k * baseInterval,
+          });
+          if (isValidColor(toRGB, pos)) {
+            while (k + planes.center < 0) {
+              planes.points.unshift([]);
+              planes.center++;
+            }
+            while (k + planes.center > planes.points.length - 1) {
+              planes.points.push([]);
+            }
+            planes.points[k + planes.center].push({
+              color: toRGB(pos),
+              position: { x: i, y: j, z: k },
+            });
+            boundaries.u += i == boundaries.u + 1 ? 1 : 0;
+            boundaries.d -= i == boundaries.d - 1 ? 1 : 0;
+            boundaries.l -= j == boundaries.l - 1 ? 1 : 0;
+            boundaries.r += j == boundaries.r + 1 ? 1 : 0;
+            boundaries.f += k == boundaries.f + 1 ? 1 : 0;
+            boundaries.b -= k == boundaries.b - 1 ? 1 : 0;
+          }
         }
       }
     }
   }
 
-  while (!boundariesEqual(boundaries, lastBoundaries)) {
-    lastBoundaries = { ...boundaries };
-    faceExpand(
-      'u',
-      -lastBoundaries.l - baseInterval,
-      lastBoundaries.r + baseInterval,
-      -lastBoundaries.b - baseInterval,
-      lastBoundaries.f + baseInterval,
-    );
-    faceExpand(
-      'd',
-      -lastBoundaries.l - baseInterval,
-      lastBoundaries.r + baseInterval,
-      -lastBoundaries.b - baseInterval,
-      lastBoundaries.f + baseInterval,
-    );
-    // the rest of these will double-count edge and corner points for the list, but they should render fine
-    faceExpand(
-      'l',
-      -lastBoundaries.b - baseInterval,
-      lastBoundaries.f + baseInterval,
-      -lastBoundaries.d - baseInterval,
-      lastBoundaries.u + baseInterval,
-    );
-    faceExpand(
-      'r',
-      -lastBoundaries.b - baseInterval,
-      lastBoundaries.f + baseInterval,
-      -lastBoundaries.d - baseInterval,
-      lastBoundaries.u + baseInterval,
-    );
-    faceExpand(
-      'f',
-      -lastBoundaries.l - baseInterval,
-      lastBoundaries.r - baseInterval,
-      -lastBoundaries.d - baseInterval,
-      lastBoundaries.u + baseInterval,
-    );
-    faceExpand(
-      'b',
-      -lastBoundaries.l - baseInterval,
-      lastBoundaries.r - baseInterval,
-      -lastBoundaries.d - baseInterval,
-      lastBoundaries.u + baseInterval,
-    );
-  }
+  planes.boundaries = { ...boundaries };
+
+  return planes;
 }
 
 function positionsSum(p1, p2) {
   return { x: p1.x + p2.x, y: p1.y + p2.y, z: p1.z + p2.z };
-}
-
-function positionsEqual(p1, p2) {
-  return p1.x == p2.x && p1.y == p2.y && p1.z == p2.z;
 }
 
 function boundariesEqual(b1, b2) {
