@@ -15,7 +15,7 @@ export default function Gradient({ planes, offset = 0, size = 10 }) {
   return (
     <Stage width={640} height={480}>
       <Layer>
-        {planes.points[offset + planes.center].map((point, idx) => (
+        {planes.points[depth].map((point, idx) => (
           <Rect
             key={`${idx}`}
             width={size}
