@@ -27,15 +27,19 @@ export default function gradientColors(startingColor, baseInterval = 17) {
 
   const planes = {
     center: 0,
+    // TODO: Create a `Boundary` type and use it
     boundaries: { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 },
     points: [[{ color: startingColor, position: new Point() }]],
   };
 
+  // TODO: Replace single letter variable names with better ones
   let boundaries = { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 };
   let lastBoundaries = { u: -1, d: -1, l: -1, r: -1, f: -1, b: -1 };
 
   while (!boundariesEqual(boundaries, lastBoundaries)) {
     lastBoundaries = { ...boundaries };
+
+    // TODO: Replace single letter variable names with better ones
     for (let i = lastBoundaries.d - 1; i <= lastBoundaries.u + 1; i++) {
       for (let j = lastBoundaries.l - 1; j <= lastBoundaries.r + 1; j++) {
         for (
@@ -59,6 +63,9 @@ export default function gradientColors(startingColor, baseInterval = 17) {
             }),
           );
 
+          // This whole block is dense and largely unreadable due to
+          // variable names and repetition, and it's not very clear what is
+          // actually happening here and why
           if (Color.fromPos(pos).valid) {
             while (k + planes.center < 0) {
               planes.points.unshift([]);
@@ -71,6 +78,7 @@ export default function gradientColors(startingColor, baseInterval = 17) {
               color: Color.fromPos(pos),
               position: { x: i, y: j, z: k },
             });
+
             boundaries.u += i == boundaries.u + 1 ? 1 : 0;
             boundaries.d -= i == boundaries.d - 1 ? 1 : 0;
             boundaries.l -= j == boundaries.l - 1 ? 1 : 0;
