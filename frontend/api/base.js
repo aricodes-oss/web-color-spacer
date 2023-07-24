@@ -17,7 +17,6 @@ class APIResource {
 
   parseJson = text => {
     const parsed = JSON.parse(text);
-    console.log(parsed);
     return Array.isArray(parsed)
       ? parsed.map(i => deserialize(this.model, i))
       : deserialize(this.model, parsed);

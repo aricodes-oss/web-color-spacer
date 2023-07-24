@@ -113,16 +113,15 @@ export default function Home() {
         label="Layer Offset"
         min={-255}
       />
-      {!transitionPending && (
-        <Gradient
-          planes={gradientColors(Color.from({ r: 128, g: 128, b: 128 }))}
-          size={20}
-          offset={
-            // it might be better to handle the offset counter within the gradient component rather than manually out here
-            offset
-          }
-        />
-      )}
+      <Gradient
+        planes={gradientColors(Color.from({ r: 128, g: 128, b: 128 }))}
+        size={20}
+        offset={
+          // it might be better to handle the offset counter within the gradient component rather than manually out here
+          offset
+        }
+        transitioning={transitionPending}
+      />
     </>
   );
 }
