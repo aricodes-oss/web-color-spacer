@@ -2,89 +2,83 @@
 // members we need directly from their source file to avoid an import loop
 import Color from '@/schema/color';
 import Point from '@/schema/point';
+import Boundary from '@/schema/boundary';
 
 const boundariesEqual = (lhs, rhs) => Object.keys(lhs).every(key => lhs[key] === rhs[key]);
 
 export default function gradientColors(startingColor, baseInterval = 17) {
-  /* const rows = [];
-
-   * let i = 0;
-   * let j = 0;
-   * // TODO: implement orientation
-   * for (; j < 400; j += baseInterval) {
-   *   const points = [];
-   *   for (; i < 400; i += baseInterval) {
-   *     if (!isValidColor(toRGB, { x: i, y: j, z: offset })) {
-   *       continue;
-   *     }
-   *     points.push({ color: toRGB({ x: i, y: j, z: offset }), x: i / baseInterval });
-   *   }
-   *   rows.push(points);
-   *   i = 0;
-   * }
-
-   * return rows; */
-
   const planes = {
     center: 0,
-    // TODO: Create a `Boundary` type and use it
-    boundaries: { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 },
+    boundaries: new Boundary(),
     points: [[{ color: startingColor, position: new Point() }]],
   };
 
-  // TODO: Replace single letter variable names with better ones
-  let boundaries = { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 };
-  let lastBoundaries = { u: -1, d: -1, l: -1, r: -1, f: -1, b: -1 };
+  let boundaries = new Boundary();
+  // set specifically to be non-equal to `boundaries`
+  let lastBoundaries = Boundary.from({ xUpper: -1 });
 
   while (!boundariesEqual(boundaries, lastBoundaries)) {
     lastBoundaries = { ...boundaries };
 
-    // TODO: Replace single letter variable names with better ones
-    for (let i = lastBoundaries.d - 1; i <= lastBoundaries.u + 1; i++) {
-      for (let j = lastBoundaries.l - 1; j <= lastBoundaries.r + 1; j++) {
+    for (let xPosIdx = lastBoundaries.xLower - 1; xPosIdx <= lastBoundaries.xUpper + 1; xPosIdx++) {
+      for (
+        let yPosIdx = lastBoundaries.yLower - 1;
+        yPosIdx <= lastBoundaries.yUpper + 1;
+        yPosIdx++
+      ) {
+        // when you're not on the x or y facing faces of the search space, only sample the nearest and farthest points on z (hollow out the cube)
         for (
-          let k = lastBoundaries.b - 1;
-          k <= lastBoundaries.f + 1;
-          k =
-            i == lastBoundaries.d - 1 ||
-            i == lastBoundaries.u + 1 ||
-            j == lastBoundaries.l - 1 ||
-            j == lastBoundaries.r + 1 ||
-            k == lastBoundaries.f + 1
-              ? k + 1
-              : lastBoundaries.f + 1
+          let zPosIdx = lastBoundaries.zLower - 1;
+          zPosIdx <= lastBoundaries.zUpper + 1;
+          zPosIdx =
+            xPosIdx == lastBoundaries.xLower - 1 ||
+            xPosIdx == lastBoundaries.xUpper + 1 ||
+            yPosIdx == lastBoundaries.yLower - 1 ||
+            yPosIdx == lastBoundaries.yUpper + 1 ||
+            zPosIdx == lastBoundaries.zUpper + 1
+              ? zPosIdx + 1
+              : lastBoundaries.zUpper + 1
         ) {
           // TODO: implement change of orientation
           let pos = planes.points[planes.center][0].color.toPos.sum(
             Point.from({
-              x: i * baseInterval,
-              y: j * baseInterval,
-              z: k * baseInterval,
+              x: xPosIdx * baseInterval,
+              y: yPosIdx * baseInterval,
+              z: zPosIdx * baseInterval,
             }),
           );
 
-          // This whole block is dense and largely unreadable due to
-          // variable names and repetition, and it's not very clear what is
-          // actually happening here and why
+          let idx = zPosIdx + planes.center;
+
           if (Color.fromPos(pos).valid) {
-            while (k + planes.center < 0) {
+            // pad the array with empty planes before attempting to index oob, and keep track of which index was originally index 0.
+            // these loops should only ever run 0 or 1 times each time they're reached.
+            // just in case they don't, i used while instead of if to maintain a functional state instead of indexing oob
+            // i should probably have something in place to tell me if they ever run twice.
+            while (idx < 0) {
               planes.points.unshift([]);
               planes.center++;
+              idx++;
             }
-            while (k + planes.center > planes.points.length - 1) {
+            while (idx > planes.points.length - 1) {
               planes.points.push([]);
             }
-            planes.points[k + planes.center].push({
+
+            // push the current color to the current plane
+            planes.points[idx].push({
               color: Color.fromPos(pos),
-              position: { x: i, y: j, z: k },
+              position: Point.from({ x: xPosIdx, y: yPosIdx, z: zPosIdx }),
             });
 
-            boundaries.u += i == boundaries.u + 1 ? 1 : 0;
-            boundaries.d -= i == boundaries.d - 1 ? 1 : 0;
-            boundaries.l -= j == boundaries.l - 1 ? 1 : 0;
-            boundaries.r += j == boundaries.r + 1 ? 1 : 0;
-            boundaries.f += k == boundaries.f + 1 ? 1 : 0;
-            boundaries.b -= k == boundaries.b - 1 ? 1 : 0;
+            // expand out the search space for the next iteration whenever the first valid color is found in a given direction
+            // this could probably be iterated through for brevity
+            boundaries.xUpper += xPosIdx == boundaries.xUpper + 1 ? 1 : 0;
+            boundaries.yUpper += yPosIdx == boundaries.yUpper + 1 ? 1 : 0;
+            boundaries.zUpper += zPosIdx == boundaries.zUpper + 1 ? 1 : 0;
+
+            boundaries.xLower -= xPosIdx == boundaries.xLower - 1 ? 1 : 0;
+            boundaries.yLower -= yPosIdx == boundaries.yLower - 1 ? 1 : 0;
+            boundaries.zLower -= zPosIdx == boundaries.zLower - 1 ? 1 : 0;
           }
         }
       }

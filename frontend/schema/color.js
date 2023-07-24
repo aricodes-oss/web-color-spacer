@@ -9,7 +9,8 @@ class Color {
 
   static from = obj => deserialize(Color, obj);
 
-  // TODO: Make these not magic numbers/explain them
+  // Inverse function of toPos()--make sure this is kept up-to-date when toPos() is changed
+  // TODO: write a unit test to confirm at all times that fromPos(pos.toPos()) == pos
   static fromPos = ({ x, y, z }) =>
     this.from({
       r: Math.trunc((4 / 3) * (x - 0.5 * y)),
@@ -17,7 +18,7 @@ class Color {
       b: Math.trunc(z - (4 / 15) * (0.5 * x + 0.5 * y)),
     });
 
-  // TODO: Make these not magic numbers/explain them
+  // Arbitrary placeholder transformation
   get toPos() {
     return Point.from({
       x: this.r + 0.5 * this.g,

@@ -7,7 +7,7 @@ import { Color } from '@/schema';
 import { hexToRGB, gradientColors } from '@/utils';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import dynamic from 'next/dynamic';
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useMemo } from 'react';
 import Container from 'react-bootstrap/Container';
 
 const Plot = dynamic(() => import('react-plotly.js'), { ssr: false });
@@ -17,8 +17,9 @@ export default function Home() {
   const [colorFrom, setColorFrom] = useState('#000000');
   const [colorTo, setColorTo] = useState('#000000');
   const [offset, setOffset] = useState(0);
-  const [transitionPending, startTransition] = useTransition();
+  const [, startTransition] = useTransition();
   const queryClient = useQueryClient();
+  const cachedGradient = useMemo(() => gradientColors(Color.from({ r: 128, g: 128, b: 128 })), []);
 
   const query = useQuery({
     queryKey: measurements.queryKey,
@@ -114,13 +115,12 @@ export default function Home() {
         min={-255}
       />
       <Gradient
-        planes={gradientColors(Color.from({ r: 128, g: 128, b: 128 }))}
+        planes={cachedGradient}
         size={20}
         offset={
           // it might be better to handle the offset counter within the gradient component rather than manually out here
           offset
         }
-        transitioning={transitionPending}
       />
     </>
   );
