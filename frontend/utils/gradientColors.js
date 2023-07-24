@@ -1,27 +1,34 @@
-export default function gradientColors(fromRGB, toRGB, startingColor, baseInterval = 17) {
-  /*const rows = [];
+// The entrypoint of the schema package depends on this file, so we import the
+// members we need directly from their source file to avoid an import loop
+import Color from '@/schema/color';
+import Point from '@/schema/point';
 
-  let i = 0;
-  let j = 0;
-  // TODO: implement orientation
-  for (; j < 400; j += baseInterval) {
-    const points = [];
-    for (; i < 400; i += baseInterval) {
-      if (!isValidColor(toRGB, { x: i, y: j, z: offset })) {
-        continue;
-      }
-      points.push({ color: toRGB({ x: i, y: j, z: offset }), x: i / baseInterval });
-    }
-    rows.push(points);
-    i = 0;
-  }
+const boundariesEqual = (lhs, rhs) => Object.keys(lhs).every(key => lhs[key] === rhs[key]);
 
-  return rows;*/
+export default function gradientColors(startingColor, baseInterval = 17) {
+  /* const rows = [];
+
+   * let i = 0;
+   * let j = 0;
+   * // TODO: implement orientation
+   * for (; j < 400; j += baseInterval) {
+   *   const points = [];
+   *   for (; i < 400; i += baseInterval) {
+   *     if (!isValidColor(toRGB, { x: i, y: j, z: offset })) {
+   *       continue;
+   *     }
+   *     points.push({ color: toRGB({ x: i, y: j, z: offset }), x: i / baseInterval });
+   *   }
+   *   rows.push(points);
+   *   i = 0;
+   * }
+
+   * return rows; */
 
   const planes = {
     center: 0,
     boundaries: { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 },
-    points: [[{ color: startingColor, position: { x: 0, y: 0, z: 0 } }]],
+    points: [[{ color: startingColor, position: new Point() }]],
   };
 
   let boundaries = { u: 0, d: 0, l: 0, r: 0, f: 0, b: 0 };
@@ -44,12 +51,15 @@ export default function gradientColors(fromRGB, toRGB, startingColor, baseInterv
               : lastBoundaries.f + 1
         ) {
           // TODO: implement change of orientation
-          let pos = positionsSum(fromRGB(planes.points[planes.center][0].color), {
-            x: i * baseInterval,
-            y: j * baseInterval,
-            z: k * baseInterval,
-          });
-          if (isValidColor(toRGB, pos)) {
+          let pos = planes.points[planes.center][0].color.toPos.sum(
+            Point.from({
+              x: i * baseInterval,
+              y: j * baseInterval,
+              z: k * baseInterval,
+            }),
+          );
+
+          if (Color.fromPos(pos).valid) {
             while (k + planes.center < 0) {
               planes.points.unshift([]);
               planes.center++;
@@ -58,7 +68,7 @@ export default function gradientColors(fromRGB, toRGB, startingColor, baseInterv
               planes.points.push([]);
             }
             planes.points[k + planes.center].push({
-              color: toRGB(pos),
+              color: Color.fromPos(pos),
               position: { x: i, y: j, z: k },
             });
             boundaries.u += i == boundaries.u + 1 ? 1 : 0;
@@ -76,19 +86,4 @@ export default function gradientColors(fromRGB, toRGB, startingColor, baseInterv
   planes.boundaries = { ...boundaries };
 
   return planes;
-}
-
-function positionsSum(p1, p2) {
-  return { x: p1.x + p2.x, y: p1.y + p2.y, z: p1.z + p2.z };
-}
-
-function boundariesEqual(b1, b2) {
-  return (
-    b1.u == b2.u && b1.d == b2.d && b1.l == b2.l && b1.r == b2.r && b1.f == b2.f && b1.b == b2.b
-  );
-}
-
-function isValidColor(toRGB, color) {
-  let c = toRGB(color);
-  return c.r >= 0 && c.r <= 255 && c.g >= 0 && c.g <= 255 && c.b >= 0 && c.b <= 255;
 }
