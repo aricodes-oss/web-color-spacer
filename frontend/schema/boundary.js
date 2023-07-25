@@ -31,7 +31,10 @@ class Boundary {
   y = new Bounds();
   z = new Bounds();
 
-  adjacent = point => ['x', 'y', 'z'].map(axis => this[axis].adjacent(point[axis])).every(Boolean);
+  adjacent = point =>
+    Object.keys(serialize(point))
+      .map(axis => this[axis].adjacent(point[axis]))
+      .every(Boolean);
   eq = boundary => boundary.axes.every((axis, idx) => this.axes[idx].eq(axis));
 
   expandTowards = position => {
