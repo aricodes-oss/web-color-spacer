@@ -3,6 +3,9 @@ module.exports = {
   parserOptions: {
     ecmaVersion: 'latest',
     sourceType: 'module',
+    ecmaFeatures: {
+      impliedStrict: true,
+    },
   },
 
   plugins: ['react'],

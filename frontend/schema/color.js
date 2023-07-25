@@ -38,6 +38,8 @@ class Color {
   get valid() {
     return [this.r, this.g, this.b].every(component => component >= 0 && component <= 255);
   }
+
+  // TODO: Add PropTypes shape
 }
 
 createModelSchema(Color, {

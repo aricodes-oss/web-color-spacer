@@ -3,6 +3,7 @@
 import Boundary from '@/schema/boundary';
 import Color from '@/schema/color';
 import Point from '@/schema/point';
+import { serialize } from 'serializr';
 
 const boundariesEqual = (lhs, rhs) => Object.keys(lhs).every(key => lhs[key] === rhs[key]);
 
@@ -13,46 +14,36 @@ export default function gradientColors(startingColor, baseInterval = 17) {
     points: [[{ color: startingColor, position: new Point() }]],
   };
 
-  let boundaries = new Boundary();
+  let boundary = new Boundary();
   // set specifically to be non-equal to `boundaries`
-  let lastBoundaries = Boundary.from({ x: { upper: -1 } });
+  let last = Boundary.from({ x: { upper: -1 } });
+  let position = Point.from({ x: last.x.under, y: last.y.under, z: last.z.under });
 
-  while (!boundariesEqual(boundaries, lastBoundaries)) {
-    lastBoundaries = { ...boundaries };
+  while (!boundary.eq(last)) {
+    last = Boundary.from(serialize(boundary));
 
-    for (
-      let xPosIdx = lastBoundaries.x.lower - 1;
-      xPosIdx <= lastBoundaries.x.upper + 1;
-      xPosIdx++
-    ) {
-      for (
-        let yPosIdx = lastBoundaries.y.lower - 1;
-        yPosIdx <= lastBoundaries.y.upper + 1;
-        yPosIdx++
-      ) {
+    for (position.x = last.x.under; position.x <= last.x.over; position.x += 1) {
+      for (position.y = last.y.under; position.y <= last.y.over; position.y += 1) {
         // when you're not on the x or y facing faces of the search space, only sample the nearest and farthest points on z (hollow out the cube)
+
         for (
-          let zPosIdx = lastBoundaries.z.lower - 1;
-          zPosIdx <= lastBoundaries.z.upper + 1;
-          zPosIdx =
-            xPosIdx == lastBoundaries.x.lower - 1 ||
-            xPosIdx == lastBoundaries.x.upper + 1 ||
-            yPosIdx == lastBoundaries.y.lower - 1 ||
-            yPosIdx == lastBoundaries.y.upper + 1 ||
-            zPosIdx == lastBoundaries.z.upper + 1
-              ? zPosIdx + 1
-              : lastBoundaries.z.upper + 1
+          position.z = last.z.under;
+          position.z <= last.z.over;
+          position.z =
+            last.x.adjacent(position.x) || last.y.adjacent(position.y) || last.z.isOver(position.z)
+              ? position.z + 1
+              : last.z.over
         ) {
           // TODO: implement change of orientation
           let pos = planes.points[planes.center][0].color.toPos.sum(
             Point.from({
-              x: xPosIdx * baseInterval,
-              y: yPosIdx * baseInterval,
-              z: zPosIdx * baseInterval,
+              x: position.x * baseInterval,
+              y: position.y * baseInterval,
+              z: position.z * baseInterval,
             }),
           );
 
-          let idx = zPosIdx + planes.center;
+          let idx = position.z + planes.center;
 
           if (Color.fromPos(pos).valid) {
             // pad the array with empty planes before attempting to index oob, and keep track of which index was originally index 0.
@@ -71,25 +62,19 @@ export default function gradientColors(startingColor, baseInterval = 17) {
             // push the current color to the current plane
             planes.points[idx].push({
               color: Color.fromPos(pos),
-              position: Point.from({ x: xPosIdx, y: yPosIdx, z: zPosIdx }),
+              position: Point.from(position),
             });
 
             // expand out the search space for the next iteration whenever the first valid color is found in a given direction
             // this could probably be iterated through for brevity
-            boundaries.x.upper += xPosIdx == boundaries.x.upper + 1 ? 1 : 0;
-            boundaries.y.upper += yPosIdx == boundaries.y.upper + 1 ? 1 : 0;
-            boundaries.z.upper += zPosIdx == boundaries.z.upper + 1 ? 1 : 0;
-
-            boundaries.x.lower -= xPosIdx == boundaries.x.lower - 1 ? 1 : 0;
-            boundaries.y.lower -= yPosIdx == boundaries.y.lower - 1 ? 1 : 0;
-            boundaries.z.lower -= zPosIdx == boundaries.z.lower - 1 ? 1 : 0;
+            boundary.expandTowards(position);
           }
         }
       }
     }
   }
 
-  planes.boundaries = { ...boundaries };
+  planes.boundaries = { ...boundary };
 
   return planes;
 }

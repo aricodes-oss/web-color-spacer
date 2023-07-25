@@ -1,4 +1,5 @@
 /* eslint-disable react/no-array-index-key */
+import { Boundary } from '@/schema';
 import { rgbToHex } from '@/utils';
 import PropTypes from 'prop-types';
 import { Stage, Layer, Rect } from 'react-konva';
@@ -20,8 +21,8 @@ export default function Gradient({ planes, offset = 0, size = 10 }) {
             key={`${idx}`}
             width={size}
             height={size}
-            x={(point.position.x - planes.boundaries.xLower) * size}
-            y={(point.position.y - planes.boundaries.yLower) * size}
+            x={(point.position.x - planes.boundaries.x.lower) * size}
+            y={(point.position.y - planes.boundaries.y.lower) * size}
             fill={rgbToHex(point.color)}
           />
         ))}
@@ -33,10 +34,7 @@ export default function Gradient({ planes, offset = 0, size = 10 }) {
 Gradient.propTypes = {
   planes: PropTypes.shape({
     center: PropTypes.number,
-    boundaries: PropTypes.shape({
-      xLower: PropTypes.number,
-      yLower: PropTypes.number,
-    }),
+    boundaries: Boundary.shape,
     points: PropTypes.arrayOf(
       PropTypes.arrayOf(
         PropTypes.shape({
