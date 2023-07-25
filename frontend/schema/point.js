@@ -8,7 +8,7 @@ class Point {
   sum = rhs => Object.keys(rhs).reduce((acc, key) => ({ ...acc, [key]: this[key] + rhs[key] }), {});
 
   get axes() {
-    return [this.x, this.y, this.y];
+    return [this.x, this.y, this.z];
   }
 
   static from = obj => deserialize(Point, obj);
