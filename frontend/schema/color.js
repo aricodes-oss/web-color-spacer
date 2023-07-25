@@ -26,7 +26,7 @@ class Color {
       console.log({ x, y, z });
       console.log(a.toPos);
     }
-    return a;
+    return this.from({ r: Math.trunc(a.r), g: Math.trunc(a.g), b: Math.trunc(a.b) });
   };
 
   // Arbitrary placeholder transformation
