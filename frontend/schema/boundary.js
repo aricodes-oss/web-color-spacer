@@ -1,23 +1,29 @@
-import { createModelSchema, primitive, deserialize } from 'serializr';
+import { createModelSchema, object, primitive, deserialize } from 'serializr';
+
+export class Bounds {
+  upper = 0;
+  lower = 0;
+
+  static from = obj => deserialize(Bounds, obj);
+}
 
 class Boundary {
-  xUpper = 0;
-  xLower = 0;
-  yUpper = 0;
-  yLower = 0;
-  zUpper = 0;
-  zLower = 0;
+  x = new Bounds();
+  y = new Bounds();
+  z = new Bounds();
 
   static from = obj => deserialize(Boundary, obj);
 }
 
+createModelSchema(Bounds, {
+  upper: primitive(),
+  lower: primitive(),
+});
+
 createModelSchema(Boundary, {
-  xUpper: primitive(),
-  xLower: primitive(),
-  yUpper: primitive(),
-  yLower: primitive(),
-  zUpper: primitive(),
-  zLower: primitive(),
+  x: object(Bounds),
+  y: object(Bounds),
+  z: object(Bounds),
 });
 
 export default Boundary;

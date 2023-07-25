@@ -1,8 +1,8 @@
 // The entrypoint of the schema package depends on this file, so we import the
 // members we need directly from their source file to avoid an import loop
+import Boundary from '@/schema/boundary';
 import Color from '@/schema/color';
 import Point from '@/schema/point';
-import Boundary from '@/schema/boundary';
 
 const boundariesEqual = (lhs, rhs) => Object.keys(lhs).every(key => lhs[key] === rhs[key]);
 
@@ -15,29 +15,33 @@ export default function gradientColors(startingColor, baseInterval = 17) {
 
   let boundaries = new Boundary();
   // set specifically to be non-equal to `boundaries`
-  let lastBoundaries = Boundary.from({ xUpper: -1 });
+  let lastBoundaries = Boundary.from({ x: { upper: -1 } });
 
   while (!boundariesEqual(boundaries, lastBoundaries)) {
     lastBoundaries = { ...boundaries };
 
-    for (let xPosIdx = lastBoundaries.xLower - 1; xPosIdx <= lastBoundaries.xUpper + 1; xPosIdx++) {
+    for (
+      let xPosIdx = lastBoundaries.x.lower - 1;
+      xPosIdx <= lastBoundaries.x.upper + 1;
+      xPosIdx++
+    ) {
       for (
-        let yPosIdx = lastBoundaries.yLower - 1;
-        yPosIdx <= lastBoundaries.yUpper + 1;
+        let yPosIdx = lastBoundaries.y.lower - 1;
+        yPosIdx <= lastBoundaries.y.upper + 1;
         yPosIdx++
       ) {
         // when you're not on the x or y facing faces of the search space, only sample the nearest and farthest points on z (hollow out the cube)
         for (
-          let zPosIdx = lastBoundaries.zLower - 1;
-          zPosIdx <= lastBoundaries.zUpper + 1;
+          let zPosIdx = lastBoundaries.z.lower - 1;
+          zPosIdx <= lastBoundaries.z.upper + 1;
           zPosIdx =
-            xPosIdx == lastBoundaries.xLower - 1 ||
-            xPosIdx == lastBoundaries.xUpper + 1 ||
-            yPosIdx == lastBoundaries.yLower - 1 ||
-            yPosIdx == lastBoundaries.yUpper + 1 ||
-            zPosIdx == lastBoundaries.zUpper + 1
+            xPosIdx == lastBoundaries.x.lower - 1 ||
+            xPosIdx == lastBoundaries.x.upper + 1 ||
+            yPosIdx == lastBoundaries.y.lower - 1 ||
+            yPosIdx == lastBoundaries.y.upper + 1 ||
+            zPosIdx == lastBoundaries.z.upper + 1
               ? zPosIdx + 1
-              : lastBoundaries.zUpper + 1
+              : lastBoundaries.z.upper + 1
         ) {
           // TODO: implement change of orientation
           let pos = planes.points[planes.center][0].color.toPos.sum(
@@ -72,13 +76,13 @@ export default function gradientColors(startingColor, baseInterval = 17) {
 
             // expand out the search space for the next iteration whenever the first valid color is found in a given direction
             // this could probably be iterated through for brevity
-            boundaries.xUpper += xPosIdx == boundaries.xUpper + 1 ? 1 : 0;
-            boundaries.yUpper += yPosIdx == boundaries.yUpper + 1 ? 1 : 0;
-            boundaries.zUpper += zPosIdx == boundaries.zUpper + 1 ? 1 : 0;
+            boundaries.x.upper += xPosIdx == boundaries.x.upper + 1 ? 1 : 0;
+            boundaries.y.upper += yPosIdx == boundaries.y.upper + 1 ? 1 : 0;
+            boundaries.z.upper += zPosIdx == boundaries.z.upper + 1 ? 1 : 0;
 
-            boundaries.xLower -= xPosIdx == boundaries.xLower - 1 ? 1 : 0;
-            boundaries.yLower -= yPosIdx == boundaries.yLower - 1 ? 1 : 0;
-            boundaries.zLower -= zPosIdx == boundaries.zLower - 1 ? 1 : 0;
+            boundaries.x.lower -= xPosIdx == boundaries.x.lower - 1 ? 1 : 0;
+            boundaries.y.lower -= yPosIdx == boundaries.y.lower - 1 ? 1 : 0;
+            boundaries.z.lower -= zPosIdx == boundaries.z.lower - 1 ? 1 : 0;
           }
         }
       }
