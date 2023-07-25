@@ -5,8 +5,6 @@ import Color from '@/schema/color';
 import Point from '@/schema/point';
 import { serialize } from 'serializr';
 
-const boundariesEqual = (lhs, rhs) => Object.keys(lhs).every(key => lhs[key] === rhs[key]);
-
 export default function gradientColors(startingColor, baseInterval = 17) {
   const planes = {
     center: 0,

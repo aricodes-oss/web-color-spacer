@@ -10,13 +10,24 @@ class Color {
   static from = obj => deserialize(Color, obj);
 
   // Inverse function of toPos()--make sure this is kept up-to-date when toPos() is changed
-  // TODO: write a unit test to confirm at all times that fromPos(pos.toPos()) == pos
-  static fromPos = ({ x, y, z }) =>
-    this.from({
-      r: Math.trunc((4 / 3) * (x - 0.5 * y)),
-      g: Math.trunc((4 / 3) * (y - 0.5 * x)),
-      b: Math.trunc(z - (4 / 15) * (0.5 * x + 0.5 * y)),
+  static fromPos = ({ x, y, z }) => {
+    let a = this.from({
+      r: (4 / 3) * (x - 0.5 * y),
+      g: (4 / 3) * (y - 0.5 * x),
+      b: z - (4 / 15) * (0.5 * x + 0.5 * y),
     });
+    // TODO: move this check to a proper unit test so it stops lagging me out on file save if something's wrong
+    if (
+      !a.toPos.axes.every(
+        (axis, idx) => axis <= [x, y, z][idx] + 0.000000001 && axis >= [x, y, z][idx] - 0.000000001,
+      )
+    ) {
+      console.log("something's wrong with fromPos");
+      console.log({ x, y, z });
+      console.log(a.toPos);
+    }
+    return a;
+  };
 
   // Arbitrary placeholder transformation
   get toPos() {

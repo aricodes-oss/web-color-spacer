@@ -1,5 +1,6 @@
 import PropTypes from 'prop-types';
 import { createModelSchema, object, primitive, deserialize, serialize } from 'serializr';
+import Point from '@/schema/point';
 
 export class Bounds {
   upper = 0;
@@ -31,14 +32,11 @@ class Boundary {
   y = new Bounds();
   z = new Bounds();
 
-  adjacent = point =>
-    Object.keys(serialize(point))
-      .map(axis => this[axis].adjacent(point[axis]))
-      .every(Boolean);
+  adjacent = point => point.keys.map(axis => this[axis].adjacent(point[axis])).every(Boolean);
   eq = boundary => boundary.axes.every((axis, idx) => this.axes[idx].eq(axis));
 
   expandTowards = position => {
-    Object.keys(serialize(position)).forEach(axis => {
+    position.keys.forEach(axis => {
       if (this[axis].isOver(position[axis])) {
         this[axis].upper += 1;
       }

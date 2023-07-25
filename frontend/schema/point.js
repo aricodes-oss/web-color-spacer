@@ -1,4 +1,4 @@
-import { createModelSchema, primitive, deserialize } from 'serializr';
+import { createModelSchema, primitive, deserialize, serialize } from 'serializr';
 
 class Point {
   x = 0;
@@ -6,6 +6,10 @@ class Point {
   z = 0;
 
   sum = rhs => Object.keys(rhs).reduce((acc, key) => ({ ...acc, [key]: this[key] + rhs[key] }), {});
+
+  get keys() {
+    return Object.keys(serialize(this));
+  }
 
   get axes() {
     return [this.x, this.y, this.z];
