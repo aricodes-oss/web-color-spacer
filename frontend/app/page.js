@@ -20,7 +20,7 @@ export default function Home() {
   const [, startTransition] = useTransition();
   const queryClient = useQueryClient();
   const cachedGradient = useMemo(
-    () => gradientColors(Color.from({ r: 128, g: 128, b: 128 }), 10),
+    () => gradientColors(Color.from({ r: 128, g: 128, b: 128 }), 15),
     [],
   );
 

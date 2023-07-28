@@ -3,9 +3,14 @@ import { rgbToHex } from '@/utils';
 import { cam16_ucs, srgb_to_xyz, xyz_to_srgb, cam16_ucs_inverse } from '@/utils/cam16';
 import { createModelSchema, primitive, deserialize } from 'serializr';
 
-let scale = 0.0002;
+let redmorph = 0.00023;
+let bluemorph = 0.00083;
+let bluescale = 0.5;
+let grayscale = 5;
+let redshift = -6;
+let blueshift = 3;
 
-function inverse_x3x_Cubic(x) {
+function inverse_x3x_Cubic(x, scale) {
   return (
     Math.pow(
       2 /
@@ -36,9 +41,9 @@ class Color {
     }); */
     let fromJab = xyz_to_srgb(
       cam16_ucs_inverse({
-        J: x / 4,
-        a: inverse_x3x_Cubic(y),
-        b: inverse_x3x_Cubic(z),
+        J: x / grayscale,
+        a: inverse_x3x_Cubic(y, redmorph) + redshift,
+        b: inverse_x3x_Cubic(z / bluescale, bluemorph) - blueshift,
       }),
     );
     let a = this.from({
@@ -69,9 +74,9 @@ class Color {
     }); */
     let jab = cam16_ucs(srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
-      x: 4 * jab.J,
-      y: scale * Math.pow(jab.a, 3) + jab.a,
-      z: scale * Math.pow(jab.b, 3) + jab.b,
+      x: grayscale * jab.J,
+      y: redmorph * Math.pow(jab.a - redshift, 3) + jab.a - redshift,
+      z: bluescale * (bluemorph * Math.pow(jab.b + blueshift, 3) + (jab.b + blueshift)),
     });
   }
 
