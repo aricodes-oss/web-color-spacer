@@ -19,7 +19,10 @@ export default function Home() {
   const [offset, setOffset] = useState(0);
   const [, startTransition] = useTransition();
   const queryClient = useQueryClient();
-  const cachedGradient = useMemo(() => gradientColors(Color.from({ r: 128, g: 128, b: 128 })), []);
+  const cachedGradient = useMemo(
+    () => gradientColors(Color.from({ r: 128, g: 128, b: 128 }), 10),
+    [],
+  );
 
   const query = useQuery({
     queryKey: measurements.queryKey,
@@ -116,7 +119,7 @@ export default function Home() {
       />
       <Gradient
         planes={cachedGradient}
-        size={20}
+        size={15}
         offset={
           // it might be better to handle the offset counter within the gradient component rather than manually out here
           offset
