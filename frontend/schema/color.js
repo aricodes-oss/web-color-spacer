@@ -6,7 +6,7 @@ import { createModelSchema, primitive, deserialize } from 'serializr';
 let redmorph = 0.00023;
 let bluemorph = 0.00083;
 let bluescale = 0.5;
-let grayscale = 5;
+let grayscale = 3;
 let redshift = -6;
 let blueshift = 3;
 
