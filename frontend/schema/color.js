@@ -39,18 +39,16 @@ class Color {
       g: (4 / 3) * (y - 0.5 * x),
       b: z - (4 / 15) * (0.5 * x + 0.5 * y),
     }); */
-    let fromJab = xyz_to_srgb(
+    let [r, g, b] = xyz_to_srgb(
       cam16_ucs_inverse({
         J: x / grayscale,
         a: inverse_x3x_Cubic(y, redmorph) + redshift,
         b: inverse_x3x_Cubic(z / bluescale, bluemorph) - blueshift,
       }),
     );
-    let a = this.from({
-      r: fromJab[0] * 255,
-      g: fromJab[1] * 255,
-      b: fromJab[2] * 255,
-    });
+    let a = this.from(
+      Object.fromEntries(Object.entries({ r, g, b }).map(([k, v]) => [k, v * 255])),
+    );
     // TODO: move this check to a proper unit test so it stops lagging me out on file save if something's wrong
     if (
       a.valid &&

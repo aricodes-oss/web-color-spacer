@@ -6,6 +6,7 @@ class Point {
   z = 0;
 
   sum = rhs => Object.keys(rhs).reduce((acc, key) => ({ ...acc, [key]: this[key] + rhs[key] }), {});
+  eq = rhs => this.axes.every((val, idx) => rhs.axes[idx] === val);
 
   get keys() {
     return Object.keys(serialize(this));
