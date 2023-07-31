@@ -1,3 +1,4 @@
+// TODO: Move this to the math module
 // copypasted from jrus on observablehq.com
 // https://observablehq.com/@jrus/srgb
 // https://observablehq.com/@jrus/cam16

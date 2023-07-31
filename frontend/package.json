@@ -19,6 +19,7 @@
     "eslint-config-next": "13.4.5",
     "konva": "^9.2.0",
     "ky-universal": "^0.11.0",
+    "mathjs": "^11.9.1",
     "next": "13.4.5",
     "plotly.js": "^2.24.2",
     "prop-types": "^15.8.1",

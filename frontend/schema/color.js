@@ -1,6 +1,6 @@
 import Point from './point';
+import math from '@/math';
 import { rgbToHex } from '@/utils';
-import { cam16_ucs, srgb_to_xyz, xyz_to_srgb, cam16_ucs_inverse } from '@/utils/cam16';
 import { createModelSchema, primitive, deserialize } from 'serializr';
 
 let redmorph = 0.00023;
@@ -35,12 +35,12 @@ class Color {
   // Inverse function of toPos()--make sure this is kept up-to-date when toPos() is changed
   static fromPos = ({ x, y, z }) => {
     /* let a = this.from({
-      r: (4 / 3) * (x - 0.5 * y),
-      g: (4 / 3) * (y - 0.5 * x),
-      b: z - (4 / 15) * (0.5 * x + 0.5 * y),
-    }); */
-    let [r, g, b] = xyz_to_srgb(
-      cam16_ucs_inverse({
+       r: (4 / 3) * (x - 0.5 * y),
+       g: (4 / 3) * (y - 0.5 * x),
+       b: z - (4 / 15) * (0.5 * x + 0.5 * y),
+       }); */
+    let [r, g, b] = math.xyz_to_srgb(
+      math.cam16_ucs_inverse({
         J: x / grayscale,
         a: inverse_x3x_Cubic(y, redmorph) + redshift,
         b: inverse_x3x_Cubic(z / bluescale, bluemorph) - blueshift,
@@ -70,7 +70,7 @@ class Color {
       y: this.g + 0.5 * this.r,
       z: this.b + 0.2 * this.g + 0.2 * this.r,
     }); */
-    let jab = cam16_ucs(srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
+    let jab = math.cam16_ucs(math.srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
       x: grayscale * jab.J,
       y: redmorph * Math.pow(jab.a - redshift, 3) + jab.a - redshift,
