@@ -2,6 +2,7 @@ import Point from './point';
 import math from '@/math';
 import { rgbToHex } from '@/utils';
 import { createModelSchema, primitive, deserialize } from 'serializr';
+import Transform from './transform';
 
 // Manually tweak these
 let redmorph = 0.00023;
@@ -10,6 +11,8 @@ let bluescale = 0.5;
 let grayscale = 3;
 let redshift = -6;
 let blueshift = 3;
+
+let a = Transform.from({ scope: {}, forwardexpr: '2x', inverseexpr: 'x/2' });
 
 function inverse_x3x_Cubic(x, scale) {
   const scope = {
