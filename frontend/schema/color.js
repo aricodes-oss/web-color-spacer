@@ -3,6 +3,7 @@ import math from '@/math';
 import { rgbToHex } from '@/utils';
 import { createModelSchema, primitive, deserialize } from 'serializr';
 
+// Manually tweak these
 let redmorph = 0.00023;
 let bluemorph = 0.00083;
 let bluescale = 0.5;
@@ -11,18 +12,12 @@ let redshift = -6;
 let blueshift = 3;
 
 function inverse_x3x_Cubic(x, scale) {
-  return (
-    Math.pow(
-      2 /
-        (Math.sqrt(729 * Math.pow(scale, 4) * Math.pow(x, 2) + 108 * Math.pow(scale, 3)) -
-          27 * Math.pow(scale, 2) * x),
-      1 / 3,
-    ) -
-    Math.pow(
-      (Math.sqrt(81 * Math.pow(x / scale, 2) + 12 / Math.pow(scale, 3)) - (9 / scale) * x) / 18,
-      1 / 3,
-    )
-  );
+  const scope = {
+    x,
+    s: scale,
+  };
+  math.evaluate('p = cbrt(sqrt(81*s^4*x^2 + 12*s^3) - 9*s^2*x)', scope);
+  return math.evaluate('cbrt(2/3)/p - p/(cbrt(18)*s)', scope);
 }
 
 class Color {
@@ -34,11 +29,6 @@ class Color {
 
   // Inverse function of toPos()--make sure this is kept up-to-date when toPos() is changed
   static fromPos = ({ x, y, z }) => {
-    /* let a = this.from({
-       r: (4 / 3) * (x - 0.5 * y),
-       g: (4 / 3) * (y - 0.5 * x),
-       b: z - (4 / 15) * (0.5 * x + 0.5 * y),
-       }); */
     let [r, g, b] = math.xyz_to_srgb(
       math.cam16_ucs_inverse({
         J: x / grayscale,
@@ -49,7 +39,7 @@ class Color {
     let a = this.from(
       Object.fromEntries(Object.entries({ r, g, b }).map(([k, v]) => [k, v * 255])),
     );
-    // TODO: move this check to a proper unit test so it stops lagging me out on file save if something's wrong
+    // TODO: figure out whether or not this is still necessary
     if (
       a.valid &&
       !a.toPos.axes.every(
@@ -63,18 +53,18 @@ class Color {
     return this.from({ r: Math.trunc(a.r), g: Math.trunc(a.g), b: Math.trunc(a.b) });
   };
 
-  // Arbitrary placeholder transformation
+  // Manually tweaked cubic transformation after cam16
   get toPos() {
-    /* return Point.from({
-      x: this.r + 0.5 * this.g,
-      y: this.g + 0.5 * this.r,
-      z: this.b + 0.2 * this.g + 0.2 * this.r,
-    }); */
     let jab = math.cam16_ucs(math.srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
       x: grayscale * jab.J,
-      y: redmorph * Math.pow(jab.a - redshift, 3) + jab.a - redshift,
-      z: bluescale * (bluemorph * Math.pow(jab.b + blueshift, 3) + (jab.b + blueshift)),
+      y: math.evaluate('m*(a - s)^3 + a - s', { m: redmorph, a: jab.a, s: redshift }),
+      z: math.evaluate('c*(m*(b + s)^3 + b + s)', {
+        m: bluemorph,
+        b: jab.b,
+        s: blueshift,
+        c: bluescale,
+      }),
     });
   }
 
