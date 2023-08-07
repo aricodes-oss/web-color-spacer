@@ -1,6 +1,7 @@
-import { createModelSchema, primitive, deserialize, serialize } from 'serializr';
+import Resource from './base';
+import { createModelSchema, primitive, serialize } from 'serializr';
 
-class Point {
+class Point extends Resource {
   x = 0;
   y = 0;
   z = 0;
@@ -15,8 +16,6 @@ class Point {
   get axes() {
     return [this.x, this.y, this.z];
   }
-
-  static from = obj => deserialize(Point, obj);
 }
 
 createModelSchema(Point, {

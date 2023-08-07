@@ -1,8 +1,9 @@
+import Resource from './base';
 import Point from './point';
+import Transform from './transform';
 import math from '@/math';
 import { rgbToHex } from '@/utils';
-import { createModelSchema, primitive, deserialize } from 'serializr';
-import Transform from './transform';
+import { createModelSchema } from 'serializr';
 
 // Manually tweak these
 let redmorph = 0.00023;
@@ -23,12 +24,10 @@ function inverse_x3x_Cubic(x, scale) {
   return math.evaluate('cbrt(2/3)/p - p/(cbrt(18)*s)', scope);
 }
 
-class Color {
+class Color extends Resource {
   r = 0;
   g = 0;
   b = 0;
-
-  static from = obj => deserialize(Color, obj);
 
   // Inverse function of toPos()--make sure this is kept up-to-date when toPos() is changed
   static fromPos = ({ x, y, z }) => {
@@ -87,9 +86,9 @@ class Color {
 }
 
 createModelSchema(Color, {
-  r: primitive(),
-  g: primitive(),
-  b: primitive(),
+  r: true,
+  g: true,
+  b: true,
 });
 
 export default Color;

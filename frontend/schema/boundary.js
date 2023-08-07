@@ -1,8 +1,8 @@
+import Resource from './base';
 import PropTypes from 'prop-types';
-import { createModelSchema, object, primitive, deserialize, serialize } from 'serializr';
-import Point from '@/schema/point';
+import { createModelSchema, object } from 'serializr';
 
-export class Bounds {
+export class Bounds extends Resource {
   upper = 0;
   lower = 0;
 
@@ -20,14 +20,13 @@ export class Bounds {
     return this.upper + 1;
   }
 
-  static from = obj => deserialize(Bounds, obj);
   static shape = PropTypes.shape({
     lower: PropTypes.number.isRequired,
     upper: PropTypes.number.isRequired,
   });
 }
 
-class Boundary {
+class Boundary extends Resource {
   x = new Bounds();
   y = new Bounds();
   z = new Bounds();
@@ -51,8 +50,6 @@ class Boundary {
     return [this.x, this.y, this.z];
   }
 
-  static from = obj => deserialize(Boundary, obj);
-
   static shape = PropTypes.shape({
     x: Bounds.shape,
     y: Bounds.shape,
@@ -61,8 +58,8 @@ class Boundary {
 }
 
 createModelSchema(Bounds, {
-  upper: primitive(),
-  lower: primitive(),
+  upper: true,
+  lower: true,
 });
 
 createModelSchema(Boundary, {
