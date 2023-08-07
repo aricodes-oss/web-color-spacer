@@ -1,9 +1,11 @@
 import Transform from './transform';
+import { faker } from '@faker-js/faker';
 
-const scope = { k: 'v' };
+const key = faker.string.alpha();
+const scope = { [key]: faker.lorem.word() };
 
 test('accepts arbitrary k/v pairs for scope', () => {
   const parsed = Transform.from({ input: [1, 5, 9], scope });
 
-  expect(parsed.scope.k).toBe(scope.k);
+  expect(parsed.scope[key]).toBe(scope[key]);
 });
