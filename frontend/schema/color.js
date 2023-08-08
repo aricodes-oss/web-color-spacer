@@ -13,20 +13,27 @@ let grayscale = 3;
 let redshift = -6;
 let blueshift = 3;
 
-let transformY = Transform.from({
-  scope: { m: redmorph, s: redshift, p: 'cbrt(sqrt(81*m^4*x^2 + 12*m^3) - 9*m^2*x)' },
-  forwardexpr: 'm*(x - s)^3 + x - s',
-  inverseexpr: 'cbrt(2/3)/evaluate(p, {x:x, m:m}) - evaluate(p, {x:x,m:m})/(cbrt(18)*m) + s',
+let transformX = Transform.from({
+  scope: { c: grayscale },
+  forwardexprs: ['c*x'],
+  inverseexprs: ['x/c'],
 });
-
-function inverse_x3x_Cubic(x, scale) {
-  const scope = {
-    x,
-    s: scale,
-  };
-  math.evaluate('p = cbrt(sqrt(81*s^4*x^2 + 12*s^3) - 9*s^2*x)', scope);
-  return math.evaluate('cbrt(2/3)/p - p/(cbrt(18)*s)', scope);
-}
+let transformY = Transform.from({
+  scope: { m: redmorph, s: redshift },
+  forwardexprs: ['m*(x - s)^3 + x - s'],
+  inverseexprs: [
+    'p = cbrt(sqrt(81*m^4*x^2 + 12*m^3) - 9*m^2*x)',
+    'cbrt(2/3)/p - p/(cbrt(18)*m) + s',
+  ],
+});
+let transformZ = Transform.from({
+  scope: { c: bluescale, m: bluemorph, s: blueshift },
+  forwardexprs: ['c*(m*(x + s)^3 + x + s)'],
+  inverseexprs: [
+    'p = cbrt(sqrt(81*m^4*(x/c)^2 + 12*m^3) - 9*m^2*(x/c))',
+    'cbrt(2/3)/p - p/(cbrt(18)*m) - s',
+  ],
+});
 
 class Color extends Resource {
   r = 0;
@@ -37,9 +44,9 @@ class Color extends Resource {
   static fromPos = ({ x, y, z }) => {
     let [r, g, b] = math.xyz_to_srgb(
       math.cam16_ucs_inverse({
-        J: x / grayscale,
+        J: transformX.inverse(x),
         a: transformY.inverse(y),
-        b: inverse_x3x_Cubic(z / bluescale, bluemorph) - blueshift,
+        b: transformZ.inverse(z),
       }),
     );
     let a = this.from(
@@ -53,14 +60,9 @@ class Color extends Resource {
   get toPos() {
     let jab = math.cam16_ucs(math.srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
-      x: grayscale * jab.J,
+      x: transformX.forward(jab.J),
       y: transformY.forward(jab.a),
-      z: math.evaluate('c*(m*(b + s)^3 + b + s)', {
-        m: bluemorph,
-        b: jab.b,
-        s: blueshift,
-        c: bluescale,
-      }),
+      z: transformZ.forward(jab.b),
     });
   }
 
