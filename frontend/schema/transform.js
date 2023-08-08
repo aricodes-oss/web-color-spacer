@@ -11,20 +11,24 @@ class Transform extends Resource {
 
   forward = x => {
     let s = { x, ...this.scope };
-    math.evaluate(this.forwardexpr, s);
+    return math.evaluate(this.forwardexpr, s);
   };
 
   inverse = x => {
     let s = { x, ...this.scope };
-    math.evaluate(this.inverseexpr, s);
+    if (!math.equal(math.evaluate(this.inverseexpr, { x: this.forward(x), ...this.scope }), x)) {
+      throw new Error(
+        'Inverse is not the inverse of forward, or floating point errors exceeded epsilon',
+      );
+    }
+    return math.evaluate(this.inverseexpr, s);
   };
 }
 
 createModelSchema(Transform, {
   scope: map(), // empty PropSchema matches map[string]any
-  input: list(),
-  forwardfunc: true, // shorthand for primitive()
-  inversefunc: true,
+  forwardexpr: true, // shorthand for primitive()
+  inverseexpr: true,
 });
 
 export default Transform;

@@ -13,7 +13,11 @@ let grayscale = 3;
 let redshift = -6;
 let blueshift = 3;
 
-let a = Transform.from({ scope: {}, forwardexpr: '2x', inverseexpr: 'x/2' });
+let transformY = Transform.from({
+  scope: { m: redmorph, s: redshift, p: 'cbrt(sqrt(81*m^4*x^2 + 12*m^3) - 9*m^2*x)' },
+  forwardexpr: 'm*(x - s)^3 + x - s',
+  inverseexpr: 'cbrt(2/3)/evaluate(p, {x:x, m:m}) - evaluate(p, {x:x,m:m})/(cbrt(18)*m) + s',
+});
 
 function inverse_x3x_Cubic(x, scale) {
   const scope = {
@@ -34,24 +38,14 @@ class Color extends Resource {
     let [r, g, b] = math.xyz_to_srgb(
       math.cam16_ucs_inverse({
         J: x / grayscale,
-        a: inverse_x3x_Cubic(y, redmorph) + redshift,
+        a: transformY.inverse(y),
         b: inverse_x3x_Cubic(z / bluescale, bluemorph) - blueshift,
       }),
     );
     let a = this.from(
       Object.fromEntries(Object.entries({ r, g, b }).map(([k, v]) => [k, v * 255])),
     );
-    // TODO: figure out whether or not this is still necessary
-    if (
-      a.valid &&
-      !a.toPos.axes.every(
-        (axis, idx) => axis <= [x, y, z][idx] + 0.00000001 && axis >= [x, y, z][idx] - 0.00000001,
-      )
-    ) {
-      console.log("something's wrong with fromPos");
-      console.log({ x, y, z });
-      console.log(a.toPos);
-    }
+
     return this.from({ r: Math.trunc(a.r), g: Math.trunc(a.g), b: Math.trunc(a.b) });
   };
 
@@ -60,7 +54,7 @@ class Color extends Resource {
     let jab = math.cam16_ucs(math.srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
       x: grayscale * jab.J,
-      y: math.evaluate('m*(a - s)^3 + a - s', { m: redmorph, a: jab.a, s: redshift }),
+      y: transformY.forward(jab.a),
       z: math.evaluate('c*(m*(b + s)^3 + b + s)', {
         m: bluemorph,
         b: jab.b,
