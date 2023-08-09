@@ -5,32 +5,31 @@ import PropTypes from 'prop-types';
 import { Stage, Layer, Rect } from 'react-konva';
 
 export default function Gradient({ planes, offset = 0, size = 10 }) {
-  let depth = offset + planes.center;
-  // could use a proper clamping function here for brevity
-  if (depth < 0) {
-    depth = 0;
+  if (planes[offset] === undefined) {
+    planes[offset] = {};
   }
-  if (depth > planes.points.length - 1) {
-    depth = planes.points.length - 1;
-  }
+  // broken
   return (
     <Stage width={640} height={480}>
       <Layer>
-        {planes.points[depth].map((point, idx) => (
-          <Rect
-            key={`${idx}`}
-            width={size}
-            height={size}
-            x={(point.position.x - planes.boundaries.x.lower) * size}
-            y={(point.position.y - planes.boundaries.y.lower) * size}
-            fill={rgbToHex(point.color)}
-          />
-        ))}
+        {Object.keys(planes[offset]).forEach(keyY =>
+          Object.keys(planes[offset][keyY]).forEach(keyZ => (
+            <Rect
+              key={`${keyY}, ${keyZ}`}
+              width={size}
+              height={size}
+              x={keyY * size}
+              y={keyZ * size}
+              fill={rgbToHex(planes[offset][keyY][keyZ])}
+            />
+          )),
+        )}
       </Layer>
     </Stage>
   );
 }
 
+/*
 Gradient.propTypes = {
   planes: PropTypes.shape({
     center: PropTypes.number,
@@ -54,5 +53,5 @@ Gradient.propTypes = {
 
   offset: PropTypes.number,
   size: PropTypes.number,
-};
+}; */
 /* eslint-enable react/no-array-index-key */

@@ -6,73 +6,92 @@ import Point from '@/schema/point';
 import { serialize } from 'serializr';
 
 export default function gradientColors(startingColor, baseInterval = 17) {
-  const planes = {
-    center: 0,
-    boundaries: new Boundary(),
-    points: [[{ color: startingColor, position: new Point() }]],
+  const heartwood = {};
+
+  // not a 3d array because negative indices are really convenient here
+  // in retrospect this probably did more harm than good though
+  let sapwood = {
+    0: { 0: { 0: startingColor } },
   };
 
-  let boundary = new Boundary();
-  // set specifically to be non-equal to `boundaries`
-  let last = Boundary.from({ x: { upper: -1 } });
-  let position = Point.from({ x: last.x.under, y: last.y.under, z: last.z.under });
+  const bark = {};
 
-  while (!boundary.eq(last)) {
-    last = Boundary.from(serialize(boundary));
+  let temp = {};
 
-    for (position.x = last.x.under; position.x <= last.x.over; position.x += 1) {
-      for (position.y = last.y.under; position.y <= last.y.over; position.y += 1) {
-        // when you're not on the x or y facing faces of the search space, only sample the nearest and farthest points on z (hollow out the cube)
+  const ITERATION_CUTOFF = 100000;
+  for (let i = 0; i < ITERATION_CUTOFF && Object.keys(sapwood).length != 0; i++) {
+    // loop through points on the boundary
+    for (const x in sapwood) {
+      for (const y in sapwood[x]) {
+        for (const z in sapwood[x][y]) {
+          // loop through the cube adjacent to the point
+          for (let a = x - 1; a <= x + 1; a++) {
+            for (let b = y - 1; b <= y + 1; b++) {
+              for (let c = z - 1; c <= z + 1; c++) {
+                // do nothing if we've looked at this place before
+                // kinda shitty condition but it works i think
+                if (
+                  (heartwood[a] !== undefined &&
+                    heartwood[a][b] !== undefined &&
+                    heartwood[a][b][c] !== undefined) ||
+                  (sapwood[a] !== undefined &&
+                    sapwood[a][b] !== undefined &&
+                    sapwood[a][b][c] !== undefined) ||
+                  (bark[a] !== undefined && bark[a][b] !== undefined && bark[a][b][c] !== undefined)
+                ) {
+                  continue;
+                }
 
-        for (
-          position.z = last.z.under;
-          position.z <= last.z.over;
-          position.z =
-            last.x.adjacent(position.x) || last.y.adjacent(position.y) || last.z.isOver(position.z)
-              ? position.z + 1
-              : last.z.over
-        ) {
-          // TODO: implement change of orientation
-          let pos = planes.points[planes.center][0].color.toPos.sum(
-            Point.from({
-              x: position.x * baseInterval,
-              y: position.y * baseInterval,
-              z: position.z * baseInterval,
-            }),
-          );
+                // add to bark if the color is invalid
+                let pos = startingColor.toPos.sum(
+                  Point.from({
+                    x: a * baseInterval,
+                    y: b * baseInterval,
+                    z: c * baseInterval,
+                  }),
+                );
+                if (!Color.fromPos(pos).valid) {
+                  setHelper(bark, a, b);
+                  bark[a][b][c] = 'invalid';
+                  continue;
+                }
 
-          let idx = position.z + planes.center;
-
-          if (Color.fromPos(pos).valid) {
-            // pad the array with empty planes before attempting to index oob, and keep track of which index was originally index 0.
-            // these loops should only ever run 0 or 1 times each time they're reached.
-            // just in case they don't, i used while instead of if to maintain a functional state instead of indexing oob
-            // i should probably have something in place to tell me if they ever run twice.
-            while (idx < 0) {
-              planes.points.unshift([]);
-              planes.center++;
-              idx++;
+                // prepare next cycle's sapwood if new and valid
+                setHelper(temp, a, b);
+                temp[a][b][c] = Color.fromPos(pos);
+              }
             }
-            while (idx > planes.points.length - 1) {
-              planes.points.push([]);
-            }
-
-            // push the current color to the current plane
-            planes.points[idx].push({
-              color: Color.fromPos(pos),
-              position: Point.from(position),
-            });
-
-            // expand out the search space for the next iteration whenever the first valid color is found in a given direction
-            // this could probably be iterated through for brevity
-            boundary.expandTowards(position);
           }
         }
       }
     }
+
+    // now that the entire for/in is done, add sapwood to heartwood and replace for next cycle
+    concatHelper(heartwood, sapwood);
+    sapwood = {};
+    concatHelper(sapwood, temp);
+    temp = {};
   }
 
-  planes.boundaries = { ...boundary };
+  return heartwood;
+}
 
-  return planes;
+function concatHelper(obj1, obj2) {
+  for (const x in obj2) {
+    for (const y in obj2[x]) {
+      for (const z in obj2[x][y]) {
+        setHelper(obj1, x, y);
+        obj1[x][y][z] = obj2[x][y][z];
+      }
+    }
+  }
+}
+
+function setHelper(obj, a, b) {
+  if (obj[a] === undefined) {
+    obj[a] = {};
+  }
+  if (obj[a][b] === undefined) {
+    obj[a][b] = {};
+  }
 }
