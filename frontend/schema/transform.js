@@ -28,6 +28,8 @@ class Transform extends Resource {
     if (
       !math.equal(math.evaluate(this.inverseexprs, { x: this.forward(x), ...this.scope }).pop(), x)
     ) {
+      console.log(x);
+      console.log(math.evaluate(this.inverseexprs, { x: this.forward(x), ...this.scope }).pop());
       throw new Error(
         'Inverse is not the inverse of forward, or floating point errors exceeded epsilon',
       );
