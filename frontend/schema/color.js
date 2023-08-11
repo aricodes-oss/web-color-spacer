@@ -14,17 +14,21 @@ let grayscale = 3;
 let redshift = -6;
 let blueshift = 3;
 
-// inverse expr ternary operator to specify limiting behavior for m=0
+// inverse expression ternary operator to specify limiting behavior for m=0
 // otherwise it'd attempt to evaluate 0/0
-let transform = Transform3d.from({
-  scopeX: { c: grayscale, m: 0, s: 0 },
-  scopeY: { c: 1, m: redmorph, s: redshift },
-  scopeZ: { c: bluescale, m: bluemorph, s: -blueshift },
-  forwardexprs: ['c*(m*(x - s)^3 + x - s)'],
-  inverseexprs: [
-    'p = cbrt(sqrt(81*m^4*(x/c)^2 + 12*m^3) - 9*m^2*(x/c))',
-    '(p != 0) ? cbrt(2/3)/p - p/(cbrt(18)*m) + s : x/c + s',
-  ],
+let cubicStretch = Transform3d.from({
+  scopes: {
+    x: { c: grayscale, m: 0, s: 0 },
+    y: { c: 1, m: redmorph, s: redshift },
+    z: { c: bluescale, m: bluemorph, s: -blueshift },
+  },
+  expressions: {
+    forward: ['c*(m*(x - s)^3 + x - s)'],
+    inverse: [
+      'p = cbrt(sqrt(81*m^4*(x/c)^2 + 12*m^3) - 9*m^2*(x/c))',
+      '(p != 0) ? cbrt(2/3)/p - p/(cbrt(18)*m) + s : x/c + s',
+    ],
+  },
 });
 
 class Color extends Resource {
@@ -36,9 +40,9 @@ class Color extends Resource {
   static fromPos = ({ x, y, z }) => {
     let [r, g, b] = math.xyz_to_srgb(
       math.cam16_ucs_inverse({
-        J: transform.tfX.inverse(x),
-        a: transform.tfY.inverse(y),
-        b: transform.tfZ.inverse(z),
+        J: cubicStretch.transforms.x.inverse(x),
+        a: cubicStretch.transforms.y.inverse(y),
+        b: cubicStretch.transforms.z.inverse(z),
       }),
     );
     let a = this.from(
@@ -52,9 +56,9 @@ class Color extends Resource {
   get toPos() {
     let jab = math.cam16_ucs(math.srgb_to_xyz([this.r / 255, this.g / 255, this.b / 255]));
     return Point.from({
-      x: transform.tfX.forward(jab.J),
-      y: transform.tfY.forward(jab.a),
-      z: transform.tfZ.forward(jab.b),
+      x: cubicStretch.transforms.x.forward(jab.J),
+      y: cubicStretch.transforms.y.forward(jab.a),
+      z: cubicStretch.transforms.z.forward(jab.b),
     });
   }
 

@@ -6,19 +6,19 @@ import { createModelSchema, map, list, primitive } from 'serializr';
 // the idea is to handle higher dimensional ones by sandwiching these between matrix multiplication.
 class Transform extends Resource {
   scope = {};
-  forwardexprs = ['']; // might need to sanitize this later
-  inverseexprs = [''];
+  // might need to sanitize these strings later
+  expressions = { forward: [''], inverse: [''] };
 
   forward = x => {
     let s = { x, ...this.scope };
     // remind me later if this eventually somehow neglects to return an array
-    return math.evaluate(this.forwardexprs, s).pop();
+    return math.evaluate(this.expressions.forward, s).pop();
   };
 
   inverse = x => {
     let s = { x, ...this.scope };
     this.checkinvertible(x);
-    return math.evaluate(this.inverseexprs, s).pop();
+    return math.evaluate(this.expressions.inverse, s).pop();
   };
 
   checkinvertible = x => {
@@ -26,10 +26,15 @@ class Transform extends Resource {
     // uses mathjs for builtin floating point error bounds
     // avoids this.inverse() to prevent infinite recursion when called from inverse()
     if (
-      !math.equal(math.evaluate(this.inverseexprs, { x: this.forward(x), ...this.scope }).pop(), x)
+      !math.equal(
+        math.evaluate(this.expressions.inverse, { x: this.forward(x), ...this.scope }).pop(),
+        x,
+      )
     ) {
       console.log(x);
-      console.log(math.evaluate(this.inverseexprs, { x: this.forward(x), ...this.scope }).pop());
+      console.log(
+        math.evaluate(this.expressions.inverse, { x: this.forward(x), ...this.scope }).pop(),
+      );
       throw new Error(
         'Inverse is not the inverse of forward, or floating point errors exceeded epsilon',
       );
@@ -38,9 +43,8 @@ class Transform extends Resource {
 }
 
 createModelSchema(Transform, {
-  scope: map(), // empty PropSchema matches map[string]any
-  forwardexprs: list(primitive()),
-  inverseexprs: list(primitive()),
+  scope: map(),
+  expressions: map(list(primitive())),
 });
 
 export default Transform;
